@@ -19,7 +19,7 @@ pyPSDR::pyPSDR(int verbosity = 0){
     _SC = Shape_Container(&_SD);
 
     if(verbosity == 0)
-        _SD._logger->set_level(spdlog::level::off);
+        _SD._logger->set_level(spdlog::level::warn);
     else if(verbosity == 1)
         _SD._logger->set_level(spdlog::level::info);
     else if(verbosity == 2)

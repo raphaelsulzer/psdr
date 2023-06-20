@@ -114,14 +114,6 @@ build CMakeFiles/example.dir/example.cpp.o: CXX_COMPILER__example_unscanned_Rele
   OBJECT_DIR = CMakeFiles/example.dir
   OBJECT_FILE_DIR = CMakeFiles/example.dir
 
-build CMakeFiles/example.dir/src/input_parser.cpp.o: CXX_COMPILER__example_unscanned_Release /home/rsulzer/cpp/psdr/psdr/src/input_parser.cpp || cmake_object_order_depends_target_example
-  DEFINES = -DBOOST_ATOMIC_DYN_LINK -DBOOST_ATOMIC_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_FILESYSTEM_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_PROGRAM_OPTIONS_NO_LIB -DBOOST_SERIALIZATION_DYN_LINK -DBOOST_SERIALIZATION_NO_LIB -DBOOST_SYSTEM_DYN_LINK -DBOOST_SYSTEM_NO_LIB -DBOOST_THREAD_DYN_LINK -DBOOST_THREAD_NO_LIB -DCGAL_USE_GMPXX=1 -DFMT_SHARED -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB
-  DEP_FILE = CMakeFiles/example.dir/src/input_parser.cpp.o.d
-  FLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /opt/miniconda3/envs/ksr3/include -O3 -DNDEBUG -frounding-math -pthread
-  INCLUDES = -I/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64 -I/opt/miniconda3/envs/ksr3/include/python3.10 -I/home/rsulzer/cpp/psdr/psdr/include -isystem /usr/local/include
-  OBJECT_DIR = CMakeFiles/example.dir
-  OBJECT_FILE_DIR = CMakeFiles/example.dir/src
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target example
@@ -130,10 +122,10 @@ build CMakeFiles/example.dir/src/input_parser.cpp.o: CXX_COMPILER__example_unsca
 #############################################
 # Link the executable example
 
-build example: CXX_EXECUTABLE_LINKER__example_Release CMakeFiles/example.dir/example.cpp.o CMakeFiles/example.dir/src/input_parser.cpp.o | /opt/miniconda3/envs/ksr3/lib/libyaml-cpp.so.0.7.0 libShapeDetection.a /opt/miniconda3/envs/ksr3/lib/libspdlog.so.1.11.0 /opt/miniconda3/envs/ksr3/lib/libgmpxx.so /opt/miniconda3/envs/ksr3/lib/libmpfr.so /opt/miniconda3/envs/ksr3/lib/libgmp.so /opt/miniconda3/envs/ksr3/lib/libfmt.so.9.1.0 /opt/miniconda3/envs/ksr3/lib/libboost_system.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_filesystem.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_atomic.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_thread.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_serialization.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_program_options.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libz.so || libShapeDetection.a
+build example: CXX_EXECUTABLE_LINKER__example_Release CMakeFiles/example.dir/example.cpp.o | libShapeDetection.a /opt/miniconda3/envs/ksr3/lib/libspdlog.so.1.11.0 /opt/miniconda3/envs/ksr3/lib/libgmpxx.so /opt/miniconda3/envs/ksr3/lib/libmpfr.so /opt/miniconda3/envs/ksr3/lib/libgmp.so /opt/miniconda3/envs/ksr3/lib/libfmt.so.9.1.0 /opt/miniconda3/envs/ksr3/lib/libboost_system.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_filesystem.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_atomic.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_thread.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_serialization.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libboost_program_options.so.1.78.0 /opt/miniconda3/envs/ksr3/lib/libz.so || libShapeDetection.a
   FLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /opt/miniconda3/envs/ksr3/include -O3 -DNDEBUG
   LINK_FLAGS = -Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,--allow-shlib-undefined -Wl,-rpath,/opt/miniconda3/envs/ksr3/lib -Wl,-rpath-link,/opt/miniconda3/envs/ksr3/lib -L/opt/miniconda3/envs/ksr3/lib
-  LINK_LIBRARIES = /opt/miniconda3/envs/ksr3/lib/libyaml-cpp.so.0.7.0  libShapeDetection.a  /opt/miniconda3/envs/ksr3/lib/libspdlog.so.1.11.0  /opt/miniconda3/envs/ksr3/lib/libgmpxx.so  /opt/miniconda3/envs/ksr3/lib/libmpfr.so  /opt/miniconda3/envs/ksr3/lib/libgmp.so  /opt/miniconda3/envs/ksr3/lib/libfmt.so.9.1.0  /opt/miniconda3/envs/ksr3/lib/libboost_system.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_filesystem.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_atomic.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_thread.so.1.78.0  -pthread  /opt/miniconda3/envs/ksr3/lib/libboost_serialization.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_program_options.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libz.so
+  LINK_LIBRARIES = libShapeDetection.a  /opt/miniconda3/envs/ksr3/lib/libspdlog.so.1.11.0  /opt/miniconda3/envs/ksr3/lib/libgmpxx.so  /opt/miniconda3/envs/ksr3/lib/libmpfr.so  /opt/miniconda3/envs/ksr3/lib/libgmp.so  /opt/miniconda3/envs/ksr3/lib/libfmt.so.9.1.0  /opt/miniconda3/envs/ksr3/lib/libboost_system.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_filesystem.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_atomic.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_thread.so.1.78.0  -pthread  /opt/miniconda3/envs/ksr3/lib/libboost_serialization.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libboost_program_options.so.1.78.0  /opt/miniconda3/envs/ksr3/lib/libz.so
   OBJECT_DIR = CMakeFiles/example.dir
   POST_BUILD = :
   PRE_LINK = :

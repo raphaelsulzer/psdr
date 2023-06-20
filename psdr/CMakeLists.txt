@@ -65,9 +65,8 @@ target_link_libraries(ShapeDetection ZLIB::ZLIB xtensor xtensor-io)
 ############ psdr ############
 ##############################
 add_executable(example
-    "example.cpp"
-    "src/input_parser.cpp")
-target_link_libraries(example PUBLIC ${YAML_CPP_LIBRARIES} ShapeDetection spdlog::spdlog)
+    "example.cpp")
+target_link_libraries(example PUBLIC ShapeDetection spdlog::spdlog)
 
 
 ##########################################

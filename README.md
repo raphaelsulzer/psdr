@@ -1,6 +1,8 @@
 # PSDR: Planar shape detection and refinement
 
 TODO: rotating gif 
+- to make a gif with 3 rotating images next to each other that rotate with the same speed
+- simply put the image first together and make a gif from the aligned images
 
 This repository contains a pipeline for planar shape detection [1] and refinement [2] from point clouds. The source code is written in C++ and we also provide convenient Python bindings.
 
@@ -10,7 +12,7 @@ This repository contains a pipeline for planar shape detection [1] and refinemen
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
 - Planar shape detection based on a robust and efficient region growing algorithm [1] (also implemented in CGAL)
 - Planar shape refinement based on an optimization finding the best trade-off between fidelity, completeness and simplicity of the configuration [2]
-- Writing of planar shapes as convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz).
+- Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz).
 
 # Installation
 
@@ -60,12 +62,13 @@ See `example/cpp` for a full example of a project that uses PSDR.
 
 ```
 auto SD = Shape_Detector();
-SD.load_points();
-SD.set_detection_parameters(min_inliers, pd_epsilon, knn, normal_th);
+SD.load_points(example/data/anchor/convexes.ply);
+SD.set_detection_parameters(20,0.02,0.8,10);
 auto SC = Shape_Container(&SD);
-SC.detect(20,0.02,0.8,10);
-SC.refine();
-SC.save(example/data/anchor/groups.npz);
+SC.detect();
+SC.refine(10);
+SC.save(example/data/gargoyle/groups.npz);
+SC.save(example/data/gargoyle/rectangles.ply,"rectangle");
 ```
 
 

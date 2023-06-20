@@ -4,6 +4,8 @@
 #include <CGAL/Shape_regularization/regularize_planes.h>
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/compute_average_spacing.h>
+#include <CGAL/estimate_scale.h>
+#include <CGAL/jet_estimate_normals.h>
 #include <CGAL/Classification/property_maps.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -128,7 +130,7 @@ bool Shape_Detector::load_ply()
 
 		std::ifstream stream(path_point_cloud);
         if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
-			return false;
+            return 1;
 		}
 	}
 	else {
@@ -136,13 +138,23 @@ bool Shape_Detector::load_ply()
 
 
         if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
-			return false;
+            return 1;
 		}
 	}
 	if (points[0].second == Inexact_Vector_3(0, 0, 0)) {
-        _logger->info("The Input PLY file does not contain 'Normals' or contains invalid 'Normals', The 'Normals' will be estimated.");
+        _logger->warn("input .ply file does not contain valid 'normals'. 'normals' will be estimated.");
 
-		CGAL::pca_estimate_normals<Concurrency_tag>
+        _logger->debug("estimate global k neighbor scale");
+        // first estimate k for knn
+        vector<Inexact_Point_3> tpoints;
+        for(const auto pnv : points)
+            tpoints.push_back(pnv.first);
+        knn = CGAL::estimate_global_k_neighbor_scale(tpoints);
+        should_compute_knn = false;
+
+        _logger->debug("estimate normals using jets");
+
+        CGAL::jet_estimate_normals<Concurrency_tag>
 			(points,
 				knn, // when using a neighborhood radius, K=0 means no limit on the number of neighbors returns
 				CGAL::parameters::point_map(Point_map())
@@ -153,7 +165,7 @@ bool Shape_Detector::load_ply()
 		if_oriented_normal = true;
 	}
 
-	return true;
+    return 0;
 }
 
 
@@ -171,7 +183,7 @@ bool Shape_Detector::load_vg()
 		stream.open(path_point_cloud);
 	}
 
-	if (!stream.is_open()) return false;
+    if (!stream.is_open()) return 1;
 
 	int N, G;
 	int line_num_points, line_num_colors, line_num_normals, line_num_groups;
@@ -384,7 +396,7 @@ bool Shape_Detector::load_vg()
     planes_to_colors.clear();
     planes_to_colors = vg_plane_colors;
 
-	return true;
+    return 0;
 }
 
 #include <xtensor-io/xnpz.hpp>
@@ -401,12 +413,12 @@ bool Shape_Detector::load_npz()
     auto a = xt::load_npz(path_point_cloud);
 
     if(a.find("points") == a.end()){
-        _logger->error("\nERROR: No points array found in NPZ file {}!", path_point_cloud);
-        return false;
+        _logger->error("No points array found in .npz file {}.", path_point_cloud);
+        return 1;
     }
     if(a.find("normals") == a.end()){
-        _logger->error("\nERROR: No normals array found in NPZ file {}!", path_point_cloud);
-        return false;
+        _logger->error("No normals array found in .npz file {}.", path_point_cloud);
+        return 1;
     }
 
     auto pts = a["points"].cast<double>();
@@ -456,7 +468,7 @@ bool Shape_Detector::load_npz()
     planes_to_colors = vg_planes_to_colors;
     planes = vg_planes;
 
-    return true;
+    return 0;
 
 }
 
@@ -637,10 +649,9 @@ void Shape_Detector::set_extrema()
 
 int Shape_Detector::set_detection_parameters(int _rg_min_points, double _rg_epsilon, int _knn, double _rg_normal_threshold)
 {
-	if (knn != _knn) {
-		knn = _knn;
-		should_compute_knn = true;
-	}
+
+    knn = _knn;
+    should_compute_knn = true; // somehow this needs to always stay on because it also computes a so called 'spherical neighborhood'
 
 	min_points = _rg_min_points;
 	epsilon = _rg_epsilon;

@@ -10,7 +10,6 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 // INTERNAL
-#include "input_parser.h"
 #include "shape_container.h"
 #include "shape_detector.h"
 
@@ -31,31 +30,28 @@ int main(int argc, char const *argv[]){
     #endif
     spdlog::set_pattern("[%H:%M:%S] [%n] [%l] %v");
 
-//    Parser ip;
-//    ip.parse(argc,argv);
 
-    string yaml_file;
+    string pointcloud_file;
     if(argc > 1)
-        yaml_file = argv[1];
+        pointcloud_file = argv[1];
     else
-        yaml_file = "/home/rsulzer/data/reconbench/confs/anchor_1.yaml";
-    YAML::Node config = YAML::LoadFile(yaml_file);
+        pointcloud_file = "/home/rsulzer/cpp/psdr/example/data/anchor/anchor_1.ply";
 
     logger->info("Detect planar shapes...");
-    logger->debug("Load pointcloud from {}",config["data"]["pointcloud"].as<string>());
+    logger->debug("Load pointcloud from {}",pointcloud_file);
 
-    auto tsd = Shape_Detector();
 
     auto SD = Shape_Detector();
-    if (SD.load_points(config["data"]["pointcloud"].as<string>())){
+
+    if (SD.load_points(pointcloud_file)){
         logger->error("Could not load input pointcloud!");
         return 1;
     }
 
-    double pd_epsilon = config["plane_detection"]["epsilon"].as<double>();
-    int min_inliers = config["plane_detection"]["min_inliers"].as<int>();
-    double normal_th = config["plane_detection"]["normal_th"].as<double>();
-    int knn = config["plane_detection"]["knn"].as<int>();
+    double pd_epsilon = 0.2;
+    int min_inliers = 20;
+    double normal_th = 0.85;
+    int knn = 10;
 
     logger->info("Detect planes with epsilon {}, min inliers {} and normal threshold {}",pd_epsilon,min_inliers,normal_th);
 
@@ -66,24 +62,16 @@ int main(int argc, char const *argv[]){
         logger->error("Could not detect planes");
         return 1;
     }
-    if(config["plane_detection"]["refine"].as<int>()){
-        if(SC.refine()){
-            logger->error("Could not refine planes!");
-            return 1;
-        }
+
+    if(SC.refine()){
+        logger->error("Could not refine planes!");
+        return 1;
     }
 
-    auto plane_root = fs::path(config["data"]["planes"].as<string>()).parent_path();
-    if(!fs::is_directory(plane_root)) fs::create_directories(plane_root);
-    logger->debug("save planes to {}",config["data"]["planes"].as<string>());
-    string path_vg = fs::path(config["data"]["planes"].as<string>()).replace_extension(".vg").string();
-    SC.save(path_vg);
-    string path_npz = fs::path(config["data"]["planes"].as<string>()).replace_extension(".npz").string();
-    logger->debug("save planes to {}",path_npz);
-    SC.save(path_npz);
-    string path_ply = fs::path(config["data"]["planes"].as<string>()).replace_extension(".ply").string();
-    logger->debug("save planes to {}",path_ply);
-    SC.save(path_ply, "convex");
+
+    string plane_file = "/home/rsulzer/cpp/psdr/example/data/anchor/anchor_1_convexes.ply";
+    logger->debug("save planes to {}",plane_file);
+    SC.save(plane_file, "convex");
 
     return 0;
 }

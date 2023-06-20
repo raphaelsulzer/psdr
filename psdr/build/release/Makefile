@@ -456,30 +456,6 @@ src/MeanShift.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ShapeDetection.dir/build.make CMakeFiles/ShapeDetection.dir/src/MeanShift.cpp.s
 .PHONY : src/MeanShift.cpp.s
 
-src/input_parser.o: src/input_parser.cpp.o
-.PHONY : src/input_parser.o
-
-# target to build an object file
-src/input_parser.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/example.dir/build.make CMakeFiles/example.dir/src/input_parser.cpp.o
-.PHONY : src/input_parser.cpp.o
-
-src/input_parser.i: src/input_parser.cpp.i
-.PHONY : src/input_parser.i
-
-# target to preprocess a source file
-src/input_parser.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/example.dir/build.make CMakeFiles/example.dir/src/input_parser.cpp.i
-.PHONY : src/input_parser.cpp.i
-
-src/input_parser.s: src/input_parser.cpp.s
-.PHONY : src/input_parser.s
-
-# target to generate assembly for a file
-src/input_parser.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/example.dir/build.make CMakeFiles/example.dir/src/input_parser.cpp.s
-.PHONY : src/input_parser.cpp.s
-
 src/python_binding.o: src/python_binding.cpp.o
 .PHONY : src/python_binding.o
 
@@ -624,9 +600,6 @@ help:
 	@echo "... src/MeanShift.o"
 	@echo "... src/MeanShift.i"
 	@echo "... src/MeanShift.s"
-	@echo "... src/input_parser.o"
-	@echo "... src/input_parser.i"
-	@echo "... src/input_parser.s"
 	@echo "... src/python_binding.o"
 	@echo "... src/python_binding.i"
 	@echo "... src/python_binding.s"

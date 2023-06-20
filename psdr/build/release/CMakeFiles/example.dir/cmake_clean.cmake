@@ -1,8 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/example.dir/example.cpp.o"
   "CMakeFiles/example.dir/example.cpp.o.d"
-  "CMakeFiles/example.dir/src/input_parser.cpp.o"
-  "CMakeFiles/example.dir/src/input_parser.cpp.o.d"
   "example"
   "example.pdb"
 )
