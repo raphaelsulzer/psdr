@@ -1,0 +1,1 @@
+/usr/lib64/ccache/c++ -fPIC -O3 -DNDEBUG -Wl,-s -Wl,--gc-sections -shared  -o pypsdr_ext.cpython-310-x86_64-linux-gnu.so CMakeFiles/pypsdr_ext.dir/src/python_binding.cpp.o  libnanobind-static.a /usr/lib64/libgmpxx.so /usr/lib64/libmpfr.so /usr/lib64/libgmp.so 

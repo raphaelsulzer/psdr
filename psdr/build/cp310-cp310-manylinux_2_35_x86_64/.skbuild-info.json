@@ -1,0 +1,8 @@
+{
+  "source_dir": "/home/rsulzer/cpp/psdr/psdr",
+  "build_dir": "/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64",
+  "cmake_path": "/usr/bin/cmake3",
+  "skbuild_path": "/opt/miniconda3/envs/ksr3/lib/python3.10/site-packages/scikit_build_core",
+  "skbuild_version": "0.4.5",
+  "python_executable": "/opt/miniconda3/envs/ksr3/bin/python3.10"
+}

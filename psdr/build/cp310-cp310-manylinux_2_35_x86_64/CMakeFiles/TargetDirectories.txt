@@ -1,0 +1,10 @@
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/ShapeDetection.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/example.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/pypsdr_ext.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/nanobind-static.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/edit_cache.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/rebuild_cache.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/list_install_components.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/install.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/install/local.dir
+/home/rsulzer/cpp/psdr/psdr/build/cp310-cp310-manylinux_2_35_x86_64/CMakeFiles/install/strip.dir

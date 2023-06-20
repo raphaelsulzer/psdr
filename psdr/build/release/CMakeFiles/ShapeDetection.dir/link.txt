@@ -1,0 +1,2 @@
+/usr/bin/ar qc libShapeDetection.a CMakeFiles/ShapeDetection.dir/src/shape_container.cpp.o CMakeFiles/ShapeDetection.dir/src/shape_detector.cpp.o CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o CMakeFiles/ShapeDetection.dir/src/MeanShift.cpp.o
+/usr/bin/ranlib libShapeDetection.a

@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.11"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "planar_shape_detection_and_refinement",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ShapeDetection::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ShapeDetection-Release-4560a48abcd483525988.json",
+					"name" : "ShapeDetection",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "example::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-example-Release-d13afa5af615bdfb437a.json",
+					"name" : "example",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nanobind-static::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nanobind-static-Release-23988ee7a8d9bf0c3868.json",
+					"name" : "nanobind-static",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pypsdr_ext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pypsdr_ext-Release-fcd80ecad8be05a2fbb7.json",
+					"name" : "pypsdr_ext",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/rsulzer/cpp/psdr/psdr/build/release",
+		"source" : "/home/rsulzer/cpp/psdr/psdr"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}

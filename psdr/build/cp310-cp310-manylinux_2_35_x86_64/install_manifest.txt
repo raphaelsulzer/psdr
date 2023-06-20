@@ -1,0 +1,1 @@
+/opt/miniconda3/envs/ksr3/lib/python3.10/site-packages/pypsdr/pypsdr_ext.cpython-310-x86_64-linux-gnu.so
