@@ -49,7 +49,7 @@ class BlenderRender:
 
         self.remove_model = True
 
-        self.rotate = False
+        self.rotation = None
 
         collection = bpy.data.collections.get("Collection")
         if collection:
@@ -77,7 +77,7 @@ class BlenderRender:
 
 
 
-    def add_camera(self, cam_file, resolution=(1024, 1024)):
+    def add_camera(self, cam_file, resolution=(1024, 1024), frames=None):
 
 
 
@@ -105,11 +105,21 @@ class BlenderRender:
         bpy.context.scene.render.resolution_x = resolution[0]
         bpy.context.scene.render.resolution_y = resolution[1]
 
+
+
+        self.camera.keyframe_insert(data_path='location',frame=0)
+
+        self.camera.location = self.rotate(location,(0,math.pi/5,-math.pi/2))
+        self.camera.keyframe_insert(data_path='location',frame=frames-1)
+
+        ttc=self.camera.constraints.new(type='TRACK_TO')
+        ttc.target = self.object
+
         bpy.context.scene.camera = self.camera
 
 
 
-    def add_light(self, location, energy=15):
+    def add_light(self, location, energy=1000000):
 
         # create light datablock, set attributes
         light_data = bpy.data.lights.new(name="light", type='POINT')
@@ -221,7 +231,14 @@ class BlenderRender:
         return MplColorHelper(cmap, points[:, axis].min(), points[:, axis].max()).get_rgb(sign * points[:, axis])
         # cols=MplColorHelper(cmap, accuracy.min(), accuracy.max()).get_rgb(accuracy)
 
-    def render_point_cloud(self, file, rotate=None, out=None):
+    def rotate(self, object, rotation_vector):
+
+
+        return object @ Matrix.Rotation(-rotation_vector[0], 3, "X") \
+               @ Matrix.Rotation(-rotation_vector[1], 3, "Y") \
+               @ Matrix.Rotation(   -rotation_vector[2], 3, "Z")
+
+    def add_point_cloud(self, file, rotation=None, out=None):
 
 
         """this is the one to use for point cloud rendering"""
@@ -245,13 +262,12 @@ class BlenderRender:
         else:
             print("ERROR: {} is not a supported file ending for point cloud rendering".format(os.path.splitext(file)[1]))
 
-        if rotate is not None:
-            points = points @ Matrix.Rotation(-rotate[0], 3, "X") @ Matrix.Rotation(-rotate[1], 3,
-                                                                                         "Y") @ Matrix.Rotation(
-                -rotate[2], 3, "Z")
-            normals = normals @ Matrix.Rotation(-rotate[0], 3, "X") @ Matrix.Rotation(-rotate[1], 3,
-                                                                                           "Y") @ Matrix.Rotation(
-                -rotate[2], 3, "Z")
+        if rotation is not None:
+            points = self.rotate(points,rotation)
+            normals = self.rotate(normals,rotation)
+
+
+        self.model_bb = np.array((points.min(axis=0),points.max(axis=0)))
 
 
         # # normals to rotmat
@@ -287,21 +303,64 @@ class BlenderRender:
                      randomize_rotation=False,
                      name=pc)
 
+
         obj = bpy.context.scene.objects[pc]
+        self.object = obj
         self.scene_coll.objects.unlink(obj)
         self.coll.objects.link(obj)
 
-        outfile = out if out else str(Path(file).with_suffix(".png"))
+        return obj
+
+
+
+
+
+    def render(self,outfile):
+
+        # outfile = out if out else str(Path(file).with_suffix(".png"))
         bpy.context.scene.render.filepath = outfile
         bpy.ops.render.render(write_still=True)
         print("Renderer to", outfile)
 
-        if self.remove_model:
-            self.coll.objects.unlink(obj)
+
+    def add_shadow_catcher(self):
+
+        # radius = np.max(np.abs(self.model_bb[0]-self.model_bb[1]))
+
+        size = max(self.object.dimensions[0],self.object.dimensions[1])
+        location = Vector((self.object.location[0],self.object.location[1],self.object.location[2]-(self.object.dimensions[2]/2)))
+
+        bpy.ops.mesh.primitive_plane_add(size=size*2, location=location)
+
+        plane = bpy.data.objects['Plane']
+        # plane.select = True
+        obj = bpy.context.active_object
+        self.scene_coll.objects.unlink(obj)
+        self.coll.objects.link(obj)
+
+        return plane
+
+
+    # def add_shadow_catcher(self):
+    #     k = 5
+    #     scale = self.object.dimensions*k
+    #
+    #     bpy.ops.mesh.primitive_cube_add(size=1.0, calc_uvs=True, enter_editmode=False, align='WORLD',
+    #                                     location=(0.0, 0.0, ((k-1)*self.object.dimensions[2])/2.1), rotation=(0.0, 0.0, 0.0), scale=scale)
+    #
+    #
+    #     plane = bpy.data.objects['Cube']
+    #     # plane.select = True
+    #     obj = bpy.context.active_object
+    #     self.scene_coll.objects.unlink(obj)
+    #     self.coll.objects.link(obj)
+    #
+    #     return plane
+
+
 
     def apply_render_settings(self, mode="normal"):
 
-        self.rotate = None
 
         match mode:
             case "normal":
@@ -327,7 +386,8 @@ class BlenderRender:
         self.marker_scale = 0.25
 
         # set in blender in "output properties" -> format -> resolution
-        self.resolution = (768, 1024)
+        # self.resolution = (768, 1024)
+        self.resolution = (600, 800)
         bpy.context.scene.view_settings.exposure = 0.4
         bpy.context.scene.view_settings.gamma = 1.6
         bpy.context.scene.view_settings.look = 'Medium High Contrast'
@@ -350,14 +410,43 @@ if __name__ == "__main__":
 
     br.apply_render_settings()
 
-    br.add_camera(os.path.join(path,model,"camera.npz"), br.resolution)
 
     # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
     br.apply_global_render_settings(renderer='CYCLES', samples=5)
 
-    br.render_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotate=[math.pi/2,0,0])
+    pc = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
+
+
+    frames = 50
+    br.add_camera(os.path.join(path,model,"camera.npz"), br.resolution, frames = frames)
+
+    plane = br.add_shadow_catcher()
+
+
+
+
+
+    light = Vector((0,0,br.object.dimensions[2]*6))
+    light = br.rotate(light,[0,math.pi/12,0])
+    br.add_light(light,10**7)
+
+
+    os.makedirs(os.path.join(path,model,"renders"),exist_ok=True)
+    # n = 5
+    # for i in range(n):
+    #     br.light.rotation_euler()
+    #     br.camera.rotation_euler()
+    #     br.render(os.path.join(path,model,"renders","{}.png".format(i)))
+
+
+    for i in range(frames):
+        bpy.context.scene.frame_set(i)
+        br.render(os.path.join(path,model,"renders","{}.png".format(i)))
 
     if br.remove_model:
+        br.coll.objects.unlink(pc)
+        br.coll.objects.unlink(plane)
+        bpy.data.objects.remove(br.light, do_unlink=True)
         bpy.data.objects.remove(br.camera, do_unlink=True)
 
     a=5
