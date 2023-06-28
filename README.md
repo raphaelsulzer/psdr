@@ -4,7 +4,7 @@ TODO: rotating gif
 - to make a gif with 3 rotating images next to each other that rotate with the same speed
 - simply put the image first together and make a gif from the aligned images
 
-This repository contains a pipeline for planar shape detection [1] and refinement [2] from point clouds. The source code is written in C++ and we also provide convenient Python bindings.
+This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++ and we also provide convenient Python bindings.
 
 # Features
 
