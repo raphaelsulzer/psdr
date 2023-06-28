@@ -158,7 +158,7 @@ public:
 	void load_region_growing_results();
 
 protected:
-	void detect_planes(bool read_clusters);
+    void detect_planes();
 
 	void regularize_planes();
 

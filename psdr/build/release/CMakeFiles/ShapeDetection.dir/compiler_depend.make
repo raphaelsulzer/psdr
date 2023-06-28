@@ -10518,6 +10518,17 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector.cpp.o: /home/rsulzer/cpp/psdr/p
   /usr/local/include/CGAL/Shape_regularization/internal/utils.h \
   /usr/local/include/CGAL/constructions_d.h \
   /usr/local/include/CGAL/Kernel_d/Point_d.h \
+  /usr/local/include/CGAL/estimate_scale.h \
+  /usr/local/include/CGAL/hierarchy_simplify_point_set.h \
+  /usr/local/include/CGAL/random_simplify_point_set.h \
+  /usr/local/include/CGAL/Point_set_2.h \
+  /usr/local/include/CGAL/license/Point_set_2.h \
+  /usr/local/include/CGAL/compare_vertices.h \
+  /usr/local/include/CGAL/jet_estimate_normals.h \
+  /usr/local/include/CGAL/Monge_via_jet_fitting.h \
+  /usr/local/include/CGAL/license/Jet_fitting_3.h \
+  /usr/local/include/CGAL/Eigen_svd.h \
+  /usr/include/Eigen/SVD \
   /usr/include/boost/algorithm/string.hpp \
   /usr/include/boost/algorithm/string/std_containers_traits.hpp \
   /usr/include/boost/algorithm/string/std/string_traits.hpp \
@@ -13760,6 +13771,14 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 
 /usr/include/boost/algorithm/string/yes_no_type.hpp:
 
+/usr/local/include/CGAL/Monge_via_jet_fitting.h:
+
+/usr/local/include/CGAL/compare_vertices.h:
+
+/usr/local/include/CGAL/hierarchy_simplify_point_set.h:
+
+/usr/local/include/CGAL/estimate_scale.h:
+
 /usr/local/include/CGAL/constructions_d.h:
 
 /usr/local/include/CGAL/Shape_regularization/internal/utils.h:
@@ -14130,6 +14149,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 
 /usr/include/boost/preprocessor/logical/or.hpp:
 
+/usr/local/include/CGAL/Point_set_2.h:
+
 /usr/include/boost/preprocessor/logical/nor.hpp:
 
 /usr/include/boost/preprocessor/logical/bitnor.hpp:
@@ -14219,6 +14240,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 /usr/include/boost/unordered_map.hpp:
 
 /usr/include/boost/multi_index/detail/hash_index_iterator.hpp:
+
+/usr/local/include/CGAL/license/Point_set_2.h:
 
 /usr/include/boost/multi_index/detail/bucket_array.hpp:
 
@@ -15009,6 +15032,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 /usr/include/boost/bimap/relation/support/data_extractor.hpp:
 
 /usr/include/boost/bimap/relation/support/member_with_tag.hpp:
+
+/usr/local/include/CGAL/license/Jet_fitting_3.h:
 
 /usr/include/boost/bimap/relation/support/is_tag_of_member_at.hpp:
 
@@ -18912,6 +18937,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 
 /usr/include/boost/mpl/aux_/integral_wrapper.hpp:
 
+/usr/local/include/CGAL/random_simplify_point_set.h:
+
 /usr/include/boost/bimap/container_adaptor/support/iterator_facade_converters.hpp:
 
 /usr/include/boost/preprocessor/seq/size.hpp:
@@ -19209,6 +19236,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 /usr/local/include/CGAL/Kernel_traits_fwd.h:
 
 /usr/local/include/CGAL/Dimension.h:
+
+/usr/local/include/CGAL/jet_estimate_normals.h:
 
 /usr/local/include/CGAL/Iterator_range.h:
 
@@ -21097,6 +21126,8 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector_index_map.cpp.o: /home/rsulzer/
 /usr/local/include/CGAL/Filtered_kernel/internal/Static_filters/Compare_y_at_x_2.h:
 
 /usr/local/include/CGAL/Filtered_kernel/internal/Static_filters/Side_of_oriented_sphere_3.h:
+
+/usr/local/include/CGAL/Eigen_svd.h:
 
 /usr/local/include/CGAL/Memory_sizer.h:
 

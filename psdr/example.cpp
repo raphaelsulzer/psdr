@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]){
     if(argc > 1)
         pointcloud_file = argv[1];
     else
-        pointcloud_file = "/home/rsulzer/cpp/psdr/example/data/anchor/anchor_1.ply";
+        pointcloud_file = "/home/rsulzer/cpp/psdr/example/data/bunny/convexes_detected/file.vg";
 
     logger->info("Detect planar shapes...");
     logger->debug("Load pointcloud from {}",pointcloud_file);
@@ -69,9 +69,11 @@ int main(int argc, char const *argv[]){
     }
 
 
-    string plane_file = "/home/rsulzer/cpp/psdr/example/data/anchor/anchor_1_convexes.ply";
+    string plane_file = "/home/rsulzer/cpp/psdr/example/data/bunny/convexes_detected/file.ply";
     logger->debug("save planes to {}",plane_file);
     SC.save(plane_file, "convex");
+    plane_file = "/home/rsulzer/cpp/psdr/example/data/bunny/convexes_detected/file.npz";
+    SC.save(plane_file);
 
     return 0;
 }

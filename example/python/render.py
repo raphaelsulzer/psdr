@@ -74,6 +74,56 @@ class BlenderRender:
 
         self.scene_coll = bpy.context.scene.collection
 
+    def add_moving_camera(self, cam_folder, resolution=(1024, 1024), frames=None):
+
+        cam_files = glob(os.path.join(cam_folder,'*'))
+
+        cam_files = sorted(cam_files)
+        cam_file = os.path.join(cam_folder, cam_files[0])
+
+        cam_data = np.load(cam_file)
+        # get with C.scene.camera.location
+        location = cam_data["location"]
+        # get with C.scene.camera.matrix_world.to_euler()
+        orientation = cam_data["orientation"]
+
+        ## make camera and link it
+        camera_data = bpy.data.cameras.new("Camera")
+        self.camera = bpy.data.objects.new("Camera", camera_data)
+
+        # get camera location with C.scene.camera.location
+        self.camera.location = location
+        # get camera angle with C.scene.camera.matrix_world.to_euler()
+        self.camera.rotation_euler = orientation
+        self.coll.objects.link(self.camera)
+
+        # change camera size
+        bpy.context.scene.render.resolution_x = resolution[0]
+        bpy.context.scene.render.resolution_y = resolution[1]
+
+        self.camera.keyframe_insert(data_path='location', frame=0)
+
+        keys = np.arange(0, frames + int(frames / (len(cam_files) - 1)), int(frames / (len(cam_files) - 1)))
+
+        for i,cf in enumerate(cam_files[1:]):
+
+            print("Add camera {} to key {}".format(cf,keys[i+1]))
+
+            cam_file = os.path.join(cam_folder, cf)
+            cam_data = np.load(cam_file)
+            location = cam_data["location"]
+            orientation = cam_data["orientation"]
+
+
+            self.camera.location = location
+            self.camera.rotation_euler = orientation
+            self.camera.keyframe_insert(data_path='location',frame=keys[i+1])
+            self.camera.keyframe_insert(data_path='rotation_euler',frame=keys[i+1])
+
+            # ttc=self.camera.constraints.new(type='TRACK_TO')
+            # ttc.target = self.object
+
+        bpy.context.scene.camera = self.camera
 
 
 
@@ -145,6 +195,7 @@ class BlenderRender:
         # bpy.context.space_data.shading.type = 'RENDERED'
 
         ## transparent background
+        # cannot get white background easily when rendering with cycles: https://www.reddit.com/r/blenderhelp/comments/azr9h0/comment/ei9lsx3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
         bpy.context.scene.render.film_transparent = True
         bpy.context.scene.render.image_settings.color_mode = 'RGBA'
 
@@ -177,21 +228,21 @@ class BlenderRender:
             cols += [0, 0, 0, 1]
         colattr.data.foreach_set("color", cols)
 
-    def render_surface(self, file, out=None):
+    def add_surface(self, file, rotation=None):
 
         ## get file and put it in scene collection
         bpy.ops.import_mesh.ply(filepath=file)
         obj1 = bpy.context.active_object
-        if self.rotate:
-            # obj.matrix_world = Matrix.Rotation(-math.pi/2,4,"Z") @ Matrix.Rotation(math.pi/2,4,"X")
-            obj1.matrix_world = Matrix.Rotation(self.rotate[2], 4, "Z") \
-                               @ Matrix.Rotation(self.rotate[1], 4, "Y") \
-                               @ Matrix.Rotation(self.rotate[0], 4, "X")
+        self.object = obj1
+        if rotation:
+            obj1.matrix_world = self.rotate(obj1.matrix_world,rotation)
+
         # remove it from scene collection
         self.scene_coll.objects.unlink(obj1)
         self.coll.objects.link(obj1)
 
 
+    def add_wireframe(self, file, rotation=None):
 
         bpy.ops.import_mesh.ply(filepath=file)
         obj = bpy.context.active_object
@@ -202,26 +253,13 @@ class BlenderRender:
 
         self.add_color(obj,remove=True)
 
-        if self.rotate:
+        if rotation:
             # obj.matrix_world = Matrix.Rotation(-math.pi/2,4,"Z") @ Matrix.Rotation(math.pi/2,4,"X")
-            obj.matrix_world = Matrix.Rotation(self.rotate[2], 4, "Z") \
-                               @ Matrix.Rotation(self.rotate[1], 4, "Y") \
-                               @ Matrix.Rotation(self.rotate[0], 4, "X")
+            obj.matrix_world = self.rotate(obj.matrix_world,rotation)
+
         # remove it from scene collection
         self.scene_coll.objects.unlink(obj)
         self.coll.objects.link(obj)
-
-
-        outfile = out if out else str(Path(file).with_suffix(".png"))
-        bpy.context.scene.render.filepath = outfile
-        bpy.ops.render.render(write_still=True)
-
-        print("Mesh render saved to ", outfile)
-
-        if self.remove_model:
-            self.coll.objects.unlink(obj)
-            self.coll.objects.unlink(obj1)
-
 
 
     def color_along_axis(self, points, axis=1):
@@ -338,7 +376,53 @@ class BlenderRender:
         self.scene_coll.objects.unlink(obj)
         self.coll.objects.link(obj)
 
-        return plane
+        self.shadow_catcher = plane
+
+
+    def add_color_cycles(self):
+        # from here:
+        # https://stackoverflow.com/a/69807985/20795095
+
+        obj = bpy.data.objects.get('convexes_detected')
+
+        # ---------- ADD AND LINK MATERIAL TO MESH ----------
+
+        # ---------- LOAD AND LINK MATERIAL TO MESH ----------
+
+        # Load material
+        mymat = bpy.data.materials.get("mymat")
+        if mymat is None:
+            mymat = bpy.data.materials.new(name="mymat")
+
+        mymat.use_nodes = True
+
+        # Link material to mesh
+        if obj.data.materials:
+            obj.data.materials[0] = mymat
+        else:
+            obj.data.materials.append(mymat)
+
+        # # ---------- MANAGE NODES OF SHADER EDITOR ----------
+
+        # Get node tree from the material
+        nodes = mymat.node_tree.nodes
+        principled_bsdf_node = nodes.get("Principled BSDF")
+
+        # # Get Vertex Color Node, create it if it does not exist in the current node tree
+        # if not "VERTEX_COLOR" in [node.type for node in nodes]:
+        #     vertex_color_node = nodes.new(type="ShaderNodeVertexColor")
+        # else:
+        #     vertex_color_node = nodes.get("Col")
+        vertex_color_node = nodes.new(type="ShaderNodeVertexColor")
+
+        # # Set the vertex_color layer we created at the beginning as input
+        # vertex_color_node.layer_name = "Col"
+
+        # Link Vertex Color Node "Color" output to Principled BSDF Node "Base Color" input
+        links = mymat.node_tree.links
+        links.new(vertex_color_node.outputs[0], principled_bsdf_node.inputs[0])
+
+
 
 
     # def add_shadow_catcher(self):
@@ -387,7 +471,7 @@ class BlenderRender:
 
         # set in blender in "output properties" -> format -> resolution
         # self.resolution = (768, 1024)
-        self.resolution = (600, 800)
+        self.resolution = (600, 600)
         bpy.context.scene.view_settings.exposure = 0.4
         bpy.context.scene.view_settings.gamma = 1.6
         bpy.context.scene.view_settings.look = 'Medium High Contrast'
@@ -396,56 +480,49 @@ class BlenderRender:
 
 if __name__ == "__main__":
 
-    # TODO: add a plane below the lowest point of the point cloud so I can cast a shadow on it
+    # todo: in blender add three points: one camera start point, one camera stop point, and one point to look at (ie track with camera)
+    # then make a script that stores these three points and loads them in this class here
 
     remove_model = False
 
     path = "/home/rsulzer/cpp/psdr/example/data"
-    model = "gargoyle"
+    model = "city"
+    mode = "convexes_detected"
 
+    frames = 20
 
     br = BlenderRender()
     br.remove_model = remove_model
-
-
-    br.apply_render_settings()
-
-
+    br.apply_render_settings("color")
     # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
     br.apply_global_render_settings(renderer='CYCLES', samples=5)
 
-    pc = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
+    # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
+    object = br.add_surface(os.path.join(path,model,"convexes_detected.ply"))
+    # object = br.add_wireframe(os.path.join(path,model,"convexes_detected.ply"))
+
+    ### add camera
+    br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
 
 
-    frames = 50
-    br.add_camera(os.path.join(path,model,"camera.npz"), br.resolution, frames = frames)
-
-    plane = br.add_shadow_catcher()
-
-
-
-
-
+    ### light and shadow
     light = Vector((0,0,br.object.dimensions[2]*6))
     light = br.rotate(light,[0,math.pi/12,0])
-    br.add_light(light,10**7)
+    br.add_light(light,10**4)
 
+    br.add_color_cycles()
+
+    # br.add_shadow_catcher()
 
     os.makedirs(os.path.join(path,model,"renders"),exist_ok=True)
-    # n = 5
-    # for i in range(n):
-    #     br.light.rotation_euler()
-    #     br.camera.rotation_euler()
-    #     br.render(os.path.join(path,model,"renders","{}.png".format(i)))
-
-
     for i in range(frames):
         bpy.context.scene.frame_set(i)
         br.render(os.path.join(path,model,"renders","{}.png".format(i)))
 
+
     if br.remove_model:
-        br.coll.objects.unlink(pc)
-        br.coll.objects.unlink(plane)
+        br.coll.objects.unlink(object)
+        br.coll.objects.unlink(br.shadow_catcher)
         bpy.data.objects.remove(br.light, do_unlink=True)
         bpy.data.objects.remove(br.camera, do_unlink=True)
 

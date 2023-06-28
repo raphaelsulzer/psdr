@@ -3524,6 +3524,16 @@ CMakeFiles/ShapeDetection.dir/src/shape_detector.cpp.o: \
  /usr/local/include/CGAL/Shape_regularization/internal/utils.h \
  /usr/local/include/CGAL/constructions_d.h \
  /usr/local/include/CGAL/Kernel_d/Point_d.h \
+ /usr/local/include/CGAL/estimate_scale.h \
+ /usr/local/include/CGAL/hierarchy_simplify_point_set.h \
+ /usr/local/include/CGAL/random_simplify_point_set.h \
+ /usr/local/include/CGAL/Point_set_2.h \
+ /usr/local/include/CGAL/license/Point_set_2.h \
+ /usr/local/include/CGAL/compare_vertices.h \
+ /usr/local/include/CGAL/jet_estimate_normals.h \
+ /usr/local/include/CGAL/Monge_via_jet_fitting.h \
+ /usr/local/include/CGAL/license/Jet_fitting_3.h \
+ /usr/local/include/CGAL/Eigen_svd.h /usr/include/Eigen/SVD \
  /usr/include/boost/algorithm/string.hpp \
  /usr/include/boost/algorithm/string/std_containers_traits.hpp \
  /usr/include/boost/algorithm/string/std/string_traits.hpp \

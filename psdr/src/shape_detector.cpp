@@ -704,7 +704,7 @@ void Shape_Detector::set_discretization_parameters(double _discretization_angle,
 
 void Shape_Detector::detect_shapes()
 {
-	detect_planes(false);
+    detect_planes();
 	
 	discretize_planes();
 	//initialized the degree of planes' freedom.
@@ -723,24 +723,6 @@ void Shape_Detector::detect_shapes()
 }
 
 
-void Shape_Detector::load_shapes()
-{
-	detect_planes(true);
-	discretize_planes();
-	initial_regular_groups_done();
-
-	get_coverage_and_mean_error();
-	ori_all_error = all_error;
-	ori_coverage = coverage;
-	ori_mean_error = mean_error;
-	ori_inliers_number = number_of_assigned_points;
-	ori_primitives_number = primitives_number;
-	ori_mean_normal_diviation = mean_normal_diviation;
-	ori_freedom_of_planes = freedom_of_planes;
-	get_last_information();
-
-}
-
 
 void Shape_Detector::regularize_shapes()
 {
@@ -751,6 +733,9 @@ void Shape_Detector::regularize_shapes()
 
 
 void Shape_Detector::refine_shapes(int mi) {
+
+    if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
+
 
     set_max_iter(mi);
 
@@ -8107,7 +8092,7 @@ void Shape_Detector::load_region_growing_results()
 
 
 
-void Shape_Detector::detect_planes(bool read_clusters)
+void Shape_Detector::detect_planes()
 {
 	clock_t t_detect_start = clock();
 
@@ -8123,24 +8108,21 @@ void Shape_Detector::detect_planes(bool read_clusters)
 	planes_centroids.clear();
 	planes_to_colors.clear();
 
-	if (path_point_cloud_extension == ".ply") {
-		planes_to_inliers.clear();
-		inliers_to_planes = std::vector<int>(points.size(), -1);
 
-		if (read_clusters) {
-			load_region_growing_results();
-		} else {
-			if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
-			do_region_growing();
-		}
-	}
+    if (path_point_cloud_extension == ".ply") {
+        planes_to_inliers.clear();
+        inliers_to_planes = std::vector<int>(points.size(), -1);
+        do_region_growing();
+    }
+//    else {
+//        if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
+//        load_region_growing_results();
+//    }
 
 	// Part 2.
 	// Extracts planes
-
-	
 	std::default_random_engine generator;
-	std::uniform_int_distribution<int> uniform_distribution(100, 225);
+    std::uniform_int_distribution<int> uniform_distribution(100, 255);
 
 	for (size_t i = 0; i < planes_to_inliers.size(); ++i) {
 
