@@ -1,6 +1,0 @@
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/ShapeDetection.dir
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/example.dir
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/pypsdr_ext.dir
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/nanobind-static.dir
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/edit_cache.dir
-/home/rsulzer/cpp/psdr/psdr/build/release/CMakeFiles/rebuild_cache.dir
