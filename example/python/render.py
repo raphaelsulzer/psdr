@@ -101,8 +101,6 @@ class BlenderRender:
         bpy.context.scene.render.resolution_x = resolution[0]
         bpy.context.scene.render.resolution_y = resolution[1]
 
-        self.camera.keyframe_insert(data_path='location', frame=0)
-
         keys = np.arange(0, frames + int(frames / (len(cam_files) -1 )), int(frames / (len(cam_files) - 1)))
 
         for i,cf in enumerate(cam_files):
@@ -204,13 +202,11 @@ class BlenderRender:
         if renderer == 'CYCLES':
             bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"  # or "OPENCL"
             bpy.context.scene.cycles.device = "GPU"
+            # bpy.context.scene.cycles.device = "CPU"
             ## basically the higher the sharper the render
             bpy.context.scene.cycles.samples = samples
         else:
-            bpy.context.scene.cycles.device = "CPU"
             bpy.data.scenes['Scene'].display.render_aa = str(samples)
-
-
 
     def add_color(self,obj,color,remove=True):
         if remove:
@@ -410,7 +406,10 @@ class BlenderRender:
 
         self.shadow_catcher = plane
 
-    def mesh_to_points(self,object):
+
+    def mesh_to_points(self,object,point_size=0.0001):
+
+        print("Apply mesh to points with point size {}".format(point_size))
 
         bpy.context.view_layer.objects.active = object
 
@@ -420,7 +419,8 @@ class BlenderRender:
         bpy.ops.node.new_geometry_node_group_assign('INVOKE_DEFAULT')
 
         ntp= mod.node_group.nodes.new('GeometryNodeMeshToPoints')
-        ntp.inputs[3].default_value = 0.0001
+        self.meshToPoints=ntp
+        ntp.inputs[3].default_value = point_size
 
         gi = mod.node_group.nodes['Group Input']
         l = gi.outputs[0].links[0] # remove default link
@@ -429,30 +429,6 @@ class BlenderRender:
 
         mod.node_group.links.new(gi.outputs[0], ntp.inputs[0])
         mod.node_group.links.new(ntp.outputs[0], go.inputs[0])
-
-
-
-    def set_freestyle_edge(self,obj,thickness=0.25,color=(0.0406086, 1, 0.038908)):
-        # more or less this: https://www.youtube.com/watch?v=TE9G-Y5EQBE&ab_channel=JoshGambrell
-
-        bpy.context.scene.render.use_freestyle = True
-
-        # obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj
-
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='SELECT')
-
-        bpy.ops.mesh.mark_freestyle_edge(clear=False)
-
-        bpy.data.linestyles["LineStyle"].color = color
-        bpy.data.linestyles["LineStyle"].thickness = thickness
-
-        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_silhouette = False
-        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_crease = False
-        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_border = False
-        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_edge_mark = True
-
 
 
     def add_attribute_color_cycles(self,obj):
@@ -485,12 +461,54 @@ class BlenderRender:
         vertex_color_node = nodes.new(type="ShaderNodeVertexColor")
 
         # # Set the vertex_color layer we created at the beginning as input
-        # vertex_color_node.layer_name = "Col"
+        vertex_color_node.layer_name = "Col"
 
         # Link Vertex Color Node "Color" output to Principled BSDF Node "Base Color" input
         links = mymat.node_tree.links
         links.new(vertex_color_node.outputs[0], principled_bsdf_node.inputs[0])
 
+
+
+
+    def set_point_cloud_color(self,object):
+
+        mod = object.modifiers.active
+
+        ntp= mod.node_group.nodes.new('GeometryNodeSetMaterial')
+
+        gi = self.meshToPoints
+        l = gi.outputs[0].links[0] # remove default link
+        mod.node_group.links.remove(l)
+        go = mod.node_group.nodes['Group Output']
+
+        mod.node_group.links.new(gi.outputs[0], ntp.inputs[0])
+        mod.node_group.links.new(ntp.outputs[0], go.inputs[0])
+
+        ntp.inputs[2].default_value = bpy.data.materials.get("mymat")
+
+
+
+
+    def set_freestyle_edge(self,obj,thickness=0.25,color=(0.0406086, 1, 0.038908)):
+        # more or less this: https://www.youtube.com/watch?v=TE9G-Y5EQBE&ab_channel=JoshGambrell
+
+        bpy.context.scene.render.use_freestyle = True
+
+        # obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+
+        bpy.ops.mesh.mark_freestyle_edge(clear=False)
+
+        bpy.data.linestyles["LineStyle"].color = color
+        bpy.data.linestyles["LineStyle"].thickness = thickness
+
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_silhouette = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_crease = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_border = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_edge_mark = True
 
 
 
@@ -539,25 +557,33 @@ if __name__ == "__main__":
     path = "/home/rsulzer/cpp/psdr/example/data"
     path = "/home/rsulzer/python/compod/example/data"
     mode = "dense_mesh"
-    model = "city"
+    model = "anchor"
 
     model_dict = dict()
     model_dict["city"] = dict()
     model_dict["city"]["rotation"] = None
     model_dict["city"]["light"] = 35**3
+    model_dict["city"]["point_size"] = 0.05
+
 
     model_dict["bunny"] = dict()
     model_dict["bunny"]["rotation"] = [-math.pi/2,0,0]
     model_dict["bunny"]["light"] = 3**3
+    model_dict["bunny"]["point_size"] = 0.001
+
+    model_dict["anchor"] = dict()
+    model_dict["anchor"]["rotation"] = None
+    model_dict["anchor"]["light"] = 3**3
+    model_dict["anchor"]["point_size"] = 0.4
 
 
-
-
-    modes = ["colored_soup","polygon_mesh","dense_mesh","convexes_refined"]
+    modes = ["colored_soup","polygon_mesh","dense_mesh","convexes_refined","pointcloud"]
     # modes = ["convexes_refined","convexes_refined_samples","pointcloud"]
     #
-    # modes = ["pointcloud"]
+    modes = ["convexes_refined_samples"]
     # modes = ["dense_mesh"]
+
+
 
     for mode in modes:
 
@@ -568,17 +594,16 @@ if __name__ == "__main__":
         else:
             path = None
 
-        frames = 150
+        frames = 10
 
         br = BlenderRender()
         br.remove_model = remove_model
         br.apply_render_settings("color")
         # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
-        br.apply_global_render_settings(renderer='CYCLES', samples=512)
+        br.apply_global_render_settings(renderer='CYCLES', samples=16)
 
         # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
         # object = br.add_surface(os.path.join(path,model,"convexes_refined/file.ply"))
-
 
         # object = br.add_surface(os.path.join(path,model,"colored_soup/file.ply"))
 
@@ -587,14 +612,15 @@ if __name__ == "__main__":
             object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"])
         elif mode in ["pointcloud"]:
             object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"],use_vertex=True)
-            br.mesh_to_points(object)
+            br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
+        elif mode in ["convexes_refined_samples"]:
+            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),rotation=model_dict[model]["rotation"],use_vertex=True)
+            br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
+        else:
+            raise ValueError
 
         br.add_attribute_color_cycles(object)
-
-        # br.set_freestyle_edge(object, color=(1, 0, 0))
-
-        # br.set_freestyle_edge(object)
-
+        br.set_point_cloud_color(object)
 
         ### add camera
         br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
@@ -606,12 +632,29 @@ if __name__ == "__main__":
         br.add_light(light,model_dict[model]["light"])
 
 
-        if True:
-            # os.makedirs(os.path.join(path,model,"renders",mode),exist_ok=True)
-            for i in range(frames):
-                bpy.context.scene.frame_set(i)
-                br.render(os.path.join(path,model,"renders",mode,"{}.png".format(i)))
+        if False:
+            bpy.data.scenes["Scene"].frame_start = 0
+            bpy.data.scenes["Scene"].frame_end = frames
+            outfile = os.path.join(path,model,"renders",mode,'i')
+            bpy.context.scene.render.filepath = outfile
+            bpy.ops.render.render(write_still=False,animation=True)
+            print("Renderer to", outfile)
 
+        if True:
+            thickness = 0.5
+            green = (0.0406086, 1, 0.038908)
+            red = (1,0,0)
+            if mode in ["dense_mesh"]:
+                br.set_freestyle_edge(object, color=red, thickness=thickness)
+            elif mode in ["polygon_mesh"]:
+                br.set_freestyle_edge(object, color=green, thickness=thickness)
+
+            bpy.data.scenes["Scene"].frame_start = frames+1
+            bpy.data.scenes["Scene"].frame_end = frames+1
+            outfile = os.path.join(path,model,"renders",mode,'i')
+            bpy.context.scene.render.filepath = outfile
+            bpy.ops.render.render(write_still=False,animation=True)
+            print("Renderer to", outfile)
 
 
         if br.remove_model:

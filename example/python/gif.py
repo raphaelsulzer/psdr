@@ -17,6 +17,8 @@ files.sort(key=os.path.getmtime)
 
 os.makedirs(os.path.join(path,model,'renders',mode+"_"),exist_ok=True)
 
+
+
 if False:
 
     # os.makedirs(os.path.join(path,model,'rendersw'),exist_ok=True)
@@ -28,7 +30,7 @@ if False:
         new_image.paste(image, (0, 0), image)
 
         i1 = i
-        i2 = 2*len(files)-i-1
+        i2 = 3*len(files)-i-1
 
         new_image = new_image.convert('RGB')
 
@@ -38,7 +40,7 @@ if False:
 
 
 
-command = ['ffmpeg','-framerate','10','-y','-i',os.path.join(path, model, "renders",mode+"_","%d.png"), os.path.join(path,model,'renders',"{}.gif".format(mode))]
+command = ['ffmpeg','-framerate','20','-y','-i',os.path.join(path, model, "renders",mode+"_","%d.png"), os.path.join(path,model,'renders',"{}.gif".format(mode))]
 print(*command)
 p=subprocess.Popen(command)
 p.wait()

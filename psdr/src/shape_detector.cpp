@@ -704,6 +704,9 @@ void Shape_Detector::set_discretization_parameters(double _discretization_angle,
 
 void Shape_Detector::detect_shapes()
 {
+
+    if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
+
     detect_planes();
 	
 	discretize_planes();
@@ -9000,8 +9003,8 @@ void Shape_Detector::to_npz(const string& filename)
 
     // Part 2.
     // Provides a description of the detected planes.
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(100, 255);
+//    std::default_random_engine generator;
+//    std::uniform_int_distribution<int> distribution(100, 255);
 
     for (size_t i = 0; i < planes_2.size(); ++i) {
 
@@ -9012,9 +9015,11 @@ void Shape_Detector::to_npz(const string& filename)
 
         const std::vector<int> & shape_assigned_pts = planes_to_inliers[i];
 
-        group_colors.push_back(distribution(generator));
-        group_colors.push_back(distribution(generator));
-        group_colors.push_back(distribution(generator));
+        auto col = planes_to_colors[i];
+
+        group_colors.push_back((int)col.red());
+        group_colors.push_back((int)col.green());
+        group_colors.push_back((int)col.blue());
 
         group_num_points.push_back(shape_assigned_pts.size());
 
