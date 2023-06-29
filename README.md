@@ -4,14 +4,14 @@ TODO: rotating gif
 - to make a gif with 3 rotating images next to each other that rotate with the same speed
 - simply put the image first together and make a gif from the aligned images
 
-This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++ and we also provide convenient Python bindings.
+This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++. We also provide Python bindings for the main functionality.
 
 # Features
 
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
-- Planar shape detection based on a robust and efficient region growing algorithm [1] (also implemented in CGAL)
-- Planar shape refinement based on an optimization finding the best trade-off between fidelity, completeness and simplicity of the configuration [2]
+- Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also implemented in CGAL)
+- Planar shape refinement based on an optimization finding the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
 - Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz).
 
 # Installation

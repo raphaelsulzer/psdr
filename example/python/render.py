@@ -1,5 +1,5 @@
 import math
-import pydevd_pycharm
+# import pydevd_pycharm
 # pydevd_pycharm.settrace('localhost', port=1090, stdoutToServer=True, stderrToServer=True)
 import os
 
@@ -103,11 +103,11 @@ class BlenderRender:
 
         self.camera.keyframe_insert(data_path='location', frame=0)
 
-        keys = np.arange(0, frames + int(frames / (len(cam_files) - 1)), int(frames / (len(cam_files) - 1)))
+        keys = np.arange(0, frames + int(frames / (len(cam_files) -1 )), int(frames / (len(cam_files) - 1)))
 
-        for i,cf in enumerate(cam_files[1:]):
+        for i,cf in enumerate(cam_files):
 
-            print("Add camera {} to key {}".format(cf,keys[i+1]))
+            print("Add camera {} to key {}".format(cf,keys[i]))
 
             cam_file = os.path.join(cam_folder, cf)
             cam_data = np.load(cam_file)
@@ -117,8 +117,8 @@ class BlenderRender:
 
             self.camera.location = location
             self.camera.rotation_euler = orientation
-            self.camera.keyframe_insert(data_path='location',frame=keys[i+1])
-            self.camera.keyframe_insert(data_path='rotation_euler',frame=keys[i+1])
+            self.camera.keyframe_insert(data_path='location',frame=keys[i])
+            self.camera.keyframe_insert(data_path='rotation_euler',frame=keys[i])
 
             # ttc=self.camera.constraints.new(type='TRACK_TO')
             # ttc.target = self.object
@@ -212,34 +212,43 @@ class BlenderRender:
 
 
 
-    def add_color(self,obj,remove=True):
+    def add_color(self,obj,color,remove=True):
         if remove:
             # remove color from wireframe
             col=obj.data.color_attributes.get('Col')
             obj.data.color_attributes.remove(col)
         # add new black color
         colattr = obj.data.color_attributes.new(
-            name='my_color',
+            name='Col',
             type='FLOAT_COLOR',
             domain='POINT',
         )
         cols = []
         for v_index in range(len(obj.data.vertices)):
-            cols += [0, 0, 0, 1]
+            cols += color # has to be with alpha value
         colattr.data.foreach_set("color", cols)
 
-    def add_surface(self, file, rotation=None):
+
+
+    def add_surface(self, file, rotation=None, color=None, use_vertex=False):
 
         ## get file and put it in scene collection
-        bpy.ops.import_mesh.ply(filepath=file)
+        bpy.ops.import_mesh.ply(filepath=file,use_verts=use_vertex)
         obj1 = bpy.context.active_object
         self.object = obj1
-        if rotation:
-            obj1.matrix_world = self.rotate(obj1.matrix_world,rotation)
+
+        if rotation is not None:
+            obj1.matrix_world = self.rotate(None,rotation)
+
+        if color is not None:
+            self.add_color(obj1,color=color,remove=False)
+
 
         # remove it from scene collection
         self.scene_coll.objects.unlink(obj1)
         self.coll.objects.link(obj1)
+
+        return obj1
 
 
     def add_wireframe(self, file, rotation=None):
@@ -248,18 +257,24 @@ class BlenderRender:
         obj = bpy.context.active_object
 
         modifier = obj.modifiers.new(name='my_modifier',type='WIREFRAME')
-        modifier.thickness = 0.001
+        modifier.thickness = 0.02
+        modifier.use_relative_offset = False
+        modifier.use_even_offset = False
         bpy.ops.object.modifier_apply(modifier='my_modifier')
 
-        self.add_color(obj,remove=True)
+        self.add_color(obj,remove=False)
 
         if rotation:
             # obj.matrix_world = Matrix.Rotation(-math.pi/2,4,"Z") @ Matrix.Rotation(math.pi/2,4,"X")
             obj.matrix_world = self.rotate(obj.matrix_world,rotation)
 
+        print("here")
+
         # remove it from scene collection
         self.scene_coll.objects.unlink(obj)
         self.coll.objects.link(obj)
+
+        return obj
 
 
     def color_along_axis(self, points, axis=1):
@@ -271,12 +286,16 @@ class BlenderRender:
 
     def rotate(self, object, rotation_vector):
 
+        if object is not None:
+            return object @ Matrix.Rotation(-rotation_vector[0], 3, "X") \
+                   @ Matrix.Rotation(-rotation_vector[1], 3, "Y") \
+                   @ Matrix.Rotation(   -rotation_vector[2], 3, "Z")
+        else:
+            return Matrix.Rotation(-rotation_vector[0], 4, "X") \
+                   @ Matrix.Rotation(-rotation_vector[1], 4, "Y") \
+                   @ Matrix.Rotation(-rotation_vector[2], 4, "Z")
 
-        return object @ Matrix.Rotation(-rotation_vector[0], 3, "X") \
-               @ Matrix.Rotation(-rotation_vector[1], 3, "Y") \
-               @ Matrix.Rotation(   -rotation_vector[2], 3, "Z")
-
-    def add_point_cloud(self, file, rotation=None, out=None):
+    def add_point_cloud(self, file, rotation=None, color=None):
 
 
         """this is the one to use for point cloud rendering"""
@@ -284,18 +303,16 @@ class BlenderRender:
             pcd = PyntCloud.from_file(file)
             points = pcd.points[["x", "y", "z"]].values
             normals = pcd.points[["nx", "ny", "nz"]].values
+            normals = normals / np.linalg.norm(normals, axis=1)[:, np.newaxis]
             if "red" in pcd.points.keys():
-                colors = pcd.points[["red", "green", "blue"]].values
-            else:
-                colors = None
+                color = pcd.points[["red", "green", "blue"]].values
+
         elif os.path.splitext(file)[1] == ".npz":
             data = np.load(file)
             points = data["points"]
             normals = data["normals"]
             if "colors" in data.keys():
-                colors = data["colors"]
-            else:
-                colors = None
+                color = data["colors"]
             normals = normals / np.linalg.norm(normals, axis=1)[:, np.newaxis]
         else:
             print("ERROR: {} is not a supported file ending for point cloud rendering".format(os.path.splitext(file)[1]))
@@ -308,36 +325,46 @@ class BlenderRender:
         self.model_bb = np.array((points.min(axis=0),points.max(axis=0)))
 
 
-        # # normals to rotmat
-        # marker_default_orient = [0, 0, 1]
-        # angles = np.arccos(np.dot(normals, marker_default_orient))
-        # cross = np.cross(normals, marker_default_orient)
+        # normals to rotmat
+        marker_default_orient = [0, 0, 0.99]
+        angles = np.arccos(np.dot(normals, marker_default_orient))
+        cross = np.cross(normals, marker_default_orient)
         # cross = cross / np.linalg.norm(cross, axis=1)[:, np.newaxis]
-        # quat = np.array([cross[:, 0], cross[:, 1], cross[:, 2], angles[:]]).transpose()
-        # rots = Rotation.from_quat(quat).as_matrix()
-        # # has to be rotated 180 degrees when using cone marker
-        # I = np.identity(3)
-        # I[0, 0] = -1
-        # I[2, 2] = -1
-        # rots = rots @ I
+        quat = np.array([cross[:, 0], cross[:, 1], cross[:, 2], angles[:]]).transpose()
+
+        rots = Rotation.from_quat(quat).as_matrix()
+        # has to be rotated 180 degrees when using cone marker
+        I = np.identity(3)
+        I[0, 0] = -1
+        I[2, 2] = -1
+        rots = rots @ I
         #
         # ## colors
-        colors = self.color_along_axis(points=points, axis=self.color_axis)[:, :3]
+        if color is None:
+            color = self.color_along_axis(points=points, axis=self.color_axis)[:, :3]
+
         #
         pc = "pc"
+
+        print("Loaded {} points".format(points.shape[0]))
+
+        points = points[:1000000]
+        rots = rots[:1000000]
+
         # bplt.Scatter(points,
-        #              color=colors,
+        #              color=color,
         #              marker_type="cones",
         #              radius_bottom=1,
         #              radius_top=3,
         #              marker_scale=[self.marker_scale, self.marker_scale, self.marker_scale / 3],
+        #              # marker_scale=[self.marker_scale, self.marker_scale, self.marker_scale],
         #              marker_rotation=rots,
         #              randomize_rotation=False,
         #              name=pc)
         bplt.Scatter(points,
-                     color=colors,
-                     marker_type="uv_spheres",
-                     marker_scale=[self.marker_scale,self.marker_scale,self.marker_scale],
+                     # color=color,
+                     marker_type="circles",
+                     marker_scale=[self.marker_scale, self.marker_scale, self.marker_scale],
                      randomize_rotation=False,
                      name=pc)
 
@@ -351,8 +378,6 @@ class BlenderRender:
 
 
 
-
-
     def render(self,outfile):
 
         # outfile = out if out else str(Path(file).with_suffix(".png"))
@@ -362,6 +387,13 @@ class BlenderRender:
 
 
     def add_shadow_catcher(self):
+
+        # ### cube
+        # k = 5
+        # scale = self.object.dimensions*k
+        # bpy.ops.mesh.primitive_cube_add(size=1.0, calc_uvs=True, enter_editmode=False, align='WORLD',
+        #                                 location=(0.0, 0.0, ((k-1)*self.object.dimensions[2])/2.1), rotation=(0.0, 0.0, 0.0), scale=scale)
+        # plane = bpy.data.objects['Cube']
 
         # radius = np.max(np.abs(self.model_bb[0]-self.model_bb[1]))
 
@@ -378,16 +410,55 @@ class BlenderRender:
 
         self.shadow_catcher = plane
 
+    def mesh_to_points(self,object):
 
-    def add_color_cycles(self):
+        bpy.context.view_layer.objects.active = object
+
+        # mod = object.modifiers.active
+        mod = object.modifiers.new(name='my_modifier', type='NODES')
+
+        bpy.ops.node.new_geometry_node_group_assign('INVOKE_DEFAULT')
+
+        ntp= mod.node_group.nodes.new('GeometryNodeMeshToPoints')
+        ntp.inputs[3].default_value = 0.0001
+
+        gi = mod.node_group.nodes['Group Input']
+        l = gi.outputs[0].links[0] # remove default link
+        mod.node_group.links.remove(l)
+        go = mod.node_group.nodes['Group Output']
+
+        mod.node_group.links.new(gi.outputs[0], ntp.inputs[0])
+        mod.node_group.links.new(ntp.outputs[0], go.inputs[0])
+
+
+
+    def set_freestyle_edge(self,obj,thickness=0.25,color=(0.0406086, 1, 0.038908)):
+        # more or less this: https://www.youtube.com/watch?v=TE9G-Y5EQBE&ab_channel=JoshGambrell
+
+        bpy.context.scene.render.use_freestyle = True
+
+        # obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+
+        bpy.ops.mesh.mark_freestyle_edge(clear=False)
+
+        bpy.data.linestyles["LineStyle"].color = color
+        bpy.data.linestyles["LineStyle"].thickness = thickness
+
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_silhouette = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_crease = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_border = False
+        bpy.context.view_layer.freestyle_settings.linesets["LineSet"].select_edge_mark = True
+
+
+
+    def add_attribute_color_cycles(self,obj):
         # from here:
         # https://stackoverflow.com/a/69807985/20795095
 
-        obj = bpy.data.objects.get('convexes_detected')
-
-        # ---------- ADD AND LINK MATERIAL TO MESH ----------
-
-        # ---------- LOAD AND LINK MATERIAL TO MESH ----------
 
         # Load material
         mymat = bpy.data.materials.get("mymat")
@@ -401,8 +472,6 @@ class BlenderRender:
             obj.data.materials[0] = mymat
         else:
             obj.data.materials.append(mymat)
-
-        # # ---------- MANAGE NODES OF SHADER EDITOR ----------
 
         # Get node tree from the material
         nodes = mymat.node_tree.nodes
@@ -422,24 +491,6 @@ class BlenderRender:
         links = mymat.node_tree.links
         links.new(vertex_color_node.outputs[0], principled_bsdf_node.inputs[0])
 
-
-
-
-    # def add_shadow_catcher(self):
-    #     k = 5
-    #     scale = self.object.dimensions*k
-    #
-    #     bpy.ops.mesh.primitive_cube_add(size=1.0, calc_uvs=True, enter_editmode=False, align='WORLD',
-    #                                     location=(0.0, 0.0, ((k-1)*self.object.dimensions[2])/2.1), rotation=(0.0, 0.0, 0.0), scale=scale)
-    #
-    #
-    #     plane = bpy.data.objects['Cube']
-    #     # plane.select = True
-    #     obj = bpy.context.active_object
-    #     self.scene_coll.objects.unlink(obj)
-    #     self.coll.objects.link(obj)
-    #
-    #     return plane
 
 
 
@@ -467,14 +518,14 @@ class BlenderRender:
 
         self.color_axis = 2
 
-        self.marker_scale = 0.25
+        self.marker_scale = 0.025
 
         # set in blender in "output properties" -> format -> resolution
         # self.resolution = (768, 1024)
         self.resolution = (600, 600)
         bpy.context.scene.view_settings.exposure = 0.4
         bpy.context.scene.view_settings.gamma = 1.6
-        bpy.context.scene.view_settings.look = 'Medium High Contrast'
+        bpy.context.scene.view_settings.look = 'High Contrast'
 
 
 
@@ -486,45 +537,90 @@ if __name__ == "__main__":
     remove_model = False
 
     path = "/home/rsulzer/cpp/psdr/example/data"
+    path = "/home/rsulzer/python/compod/example/data"
+    mode = "dense_mesh"
     model = "city"
-    mode = "convexes_detected"
 
-    frames = 20
+    model_dict = dict()
+    model_dict["city"] = dict()
+    model_dict["city"]["rotation"] = None
+    model_dict["city"]["light"] = 35**3
 
-    br = BlenderRender()
-    br.remove_model = remove_model
-    br.apply_render_settings("color")
-    # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
-    br.apply_global_render_settings(renderer='CYCLES', samples=5)
-
-    # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
-    object = br.add_surface(os.path.join(path,model,"convexes_detected.ply"))
-    # object = br.add_wireframe(os.path.join(path,model,"convexes_detected.ply"))
-
-    ### add camera
-    br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
+    model_dict["bunny"] = dict()
+    model_dict["bunny"]["rotation"] = [-math.pi/2,0,0]
+    model_dict["bunny"]["light"] = 3**3
 
 
-    ### light and shadow
-    light = Vector((0,0,br.object.dimensions[2]*6))
-    light = br.rotate(light,[0,math.pi/12,0])
-    br.add_light(light,10**4)
-
-    br.add_color_cycles()
-
-    # br.add_shadow_catcher()
-
-    os.makedirs(os.path.join(path,model,"renders"),exist_ok=True)
-    for i in range(frames):
-        bpy.context.scene.frame_set(i)
-        br.render(os.path.join(path,model,"renders","{}.png".format(i)))
 
 
-    if br.remove_model:
-        br.coll.objects.unlink(object)
-        br.coll.objects.unlink(br.shadow_catcher)
-        bpy.data.objects.remove(br.light, do_unlink=True)
-        bpy.data.objects.remove(br.camera, do_unlink=True)
+    modes = ["colored_soup","polygon_mesh","dense_mesh","convexes_refined"]
+    # modes = ["convexes_refined","convexes_refined_samples","pointcloud"]
+    #
+    # modes = ["pointcloud"]
+    # modes = ["dense_mesh"]
 
-    a=5
+    for mode in modes:
+
+        if mode in ["convexes_refined","convexes_refined_samples","pointcloud"]:
+            path = "/home/rsulzer/cpp/psdr/example/data"
+        elif mode in ["colored_soup","polygon_mesh","dense_mesh"]:
+            path = "/home/rsulzer/python/compod/example/data"
+        else:
+            path = None
+
+        frames = 150
+
+        br = BlenderRender()
+        br.remove_model = remove_model
+        br.apply_render_settings("color")
+        # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
+        br.apply_global_render_settings(renderer='CYCLES', samples=512)
+
+        # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
+        # object = br.add_surface(os.path.join(path,model,"convexes_refined/file.ply"))
+
+
+        # object = br.add_surface(os.path.join(path,model,"colored_soup/file.ply"))
+
+
+        if mode in ["colored_soup","polygon_mesh","dense_mesh","convexes_refined"]:
+            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"])
+        elif mode in ["pointcloud"]:
+            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"],use_vertex=True)
+            br.mesh_to_points(object)
+
+        br.add_attribute_color_cycles(object)
+
+        # br.set_freestyle_edge(object, color=(1, 0, 0))
+
+        # br.set_freestyle_edge(object)
+
+
+        ### add camera
+        br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
+
+
+        ### light and shadow
+        light = Vector((0,0,br.object.dimensions[2]*6))
+        light = br.rotate(light,[0,math.pi/12,0])
+        br.add_light(light,model_dict[model]["light"])
+
+
+        if True:
+            # os.makedirs(os.path.join(path,model,"renders",mode),exist_ok=True)
+            for i in range(frames):
+                bpy.context.scene.frame_set(i)
+                br.render(os.path.join(path,model,"renders",mode,"{}.png".format(i)))
+
+
+
+        if br.remove_model:
+            br.coll.objects.unlink(object)
+            br.coll.objects.unlink(br.shadow_catcher)
+            bpy.data.objects.remove(br.light, do_unlink=True)
+            bpy.data.objects.remove(br.camera, do_unlink=True)
+
+        del br
+
+        a=5
 
