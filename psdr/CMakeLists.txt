@@ -61,14 +61,6 @@ target_link_libraries(ShapeDetection ${CGAL_LIBRARIES})
 target_link_libraries(ShapeDetection spdlog::spdlog)
 target_link_libraries(ShapeDetection ZLIB::ZLIB xtensor xtensor-io)
 
-##############################
-############ psdr ############
-##############################
-add_executable(example
-    "example.cpp")
-target_link_libraries(example PUBLIC ShapeDetection spdlog::spdlog)
-
-
 ##########################################
 ############# python bindings ############
 ##########################################

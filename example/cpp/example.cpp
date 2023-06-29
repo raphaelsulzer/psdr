@@ -9,12 +9,12 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-// INTERNAL
+//// INTERNAL
 #include "shape_container.h"
 #include "shape_detector.h"
 
 
-using namespace std;
+//using namespace std;
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
@@ -42,7 +42,6 @@ int main(int argc, char const *argv[]){
 
 
     auto SD = Shape_Detector();
-
     if (SD.load_points(pointcloud_file)){
         logger->error("Could not load input pointcloud!");
         return 1;
