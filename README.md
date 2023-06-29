@@ -1,8 +1,12 @@
 # PSDR: Planar shape detection and refinement
 
-TODO: rotating gif 
-- to make a gif with 3 rotating images next to each other that rotate with the same speed
-- simply put the image first together and make a gif from the aligned images
+
+<p float="left">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined/i0011.png">
+</p>
+City 
+
 
 This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++. We also provide Python bindings for the main functionality.
 
@@ -75,13 +79,34 @@ SC.save(example/data/gargoyle/rectangles.ply,"rectangle");
 
 # Examples
 
-City 
-point cloud - convexes with random color - refined convex shapes
-
+## Increasing epsilon
+<p float="left">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+</p>
 Angel 
-convexes with decreasing epsilon and num_inliers
 
-Gargoyle with rectangle, alpha shape and convex hulls
+
+
+## Vertex groups, best rectangles, convex hulls, alpha shapes
+<p float="left">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+</p>
+Gargoyle
+
+## Surface reconstructed from detected and refined
+<p float="left">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+</p>
+Anchor
 
 
 # References

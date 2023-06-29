@@ -557,12 +557,12 @@ if __name__ == "__main__":
     path = "/home/rsulzer/cpp/psdr/example/data"
     path = "/home/rsulzer/python/compod/example/data"
     mode = "dense_mesh"
-    model = "anchor"
+    model = "city"
 
     model_dict = dict()
     model_dict["city"] = dict()
     model_dict["city"]["rotation"] = None
-    model_dict["city"]["light"] = 35**3
+    model_dict["city"]["light"] = 20000
     model_dict["city"]["point_size"] = 0.05
 
 
@@ -573,34 +573,38 @@ if __name__ == "__main__":
 
     model_dict["anchor"] = dict()
     model_dict["anchor"]["rotation"] = None
-    model_dict["anchor"]["light"] = 3**3
+    model_dict["anchor"]["light"] = 50000
     model_dict["anchor"]["point_size"] = 0.4
 
 
-    modes = ["colored_soup","polygon_mesh","dense_mesh","convexes_refined","pointcloud"]
+    modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples"]
+    modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples"]
     # modes = ["convexes_refined","convexes_refined_samples","pointcloud"]
     #
-    modes = ["convexes_refined_samples"]
+    # modes = ["convexes_refined_samples"]
     # modes = ["dense_mesh"]
 
+    # modes = ["polygon_mesh_detected"]
+    # modes = ["polygon_mesh"]
 
 
     for mode in modes:
 
-        if mode in ["convexes_refined","convexes_refined_samples","pointcloud"]:
+        if mode in ["convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples","pointcloud"]:
             path = "/home/rsulzer/cpp/psdr/example/data"
-        elif mode in ["colored_soup","polygon_mesh","dense_mesh"]:
+        elif mode in ["colored_soup","polygon_mesh","dense_mesh","polygon_mesh_detected"]:
             path = "/home/rsulzer/python/compod/example/data"
         else:
-            path = None
+            print("Mode {} does not exist".format(mode))
+            raise ValueError
 
-        frames = 10
+        frames = 150
 
         br = BlenderRender()
         br.remove_model = remove_model
         br.apply_render_settings("color")
         # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
-        br.apply_global_render_settings(renderer='CYCLES', samples=16)
+        br.apply_global_render_settings(renderer='CYCLES', samples=128)
 
         # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
         # object = br.add_surface(os.path.join(path,model,"convexes_refined/file.ply"))
@@ -608,31 +612,35 @@ if __name__ == "__main__":
         # object = br.add_surface(os.path.join(path,model,"colored_soup/file.ply"))
 
 
-        if mode in ["colored_soup","polygon_mesh","dense_mesh","convexes_refined"]:
-            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"])
+        if mode in ["colored_soup","polygon_mesh","polygon_mesh_detected","dense_mesh","convexes_refined","convexes_detected"]:
+            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.8,0.8,0.8,1],rotation=model_dict[model]["rotation"])
+            br.add_attribute_color_cycles(object)
         elif mode in ["pointcloud"]:
-            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.9,0.9,0.9,1],rotation=model_dict[model]["rotation"],use_vertex=True)
+            object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.8,0.8,0.8,1],rotation=model_dict[model]["rotation"],use_vertex=True)
             br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
-        elif mode in ["convexes_refined_samples"]:
+            br.add_attribute_color_cycles(object)
+            br.set_point_cloud_color(object)
+        elif mode in ["convexes_refined_samples","convexes_detected_samples"]:
             object = br.add_surface(os.path.join(path,model,mode,"file.ply"),rotation=model_dict[model]["rotation"],use_vertex=True)
             br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
+            br.add_attribute_color_cycles(object)
+            br.set_point_cloud_color(object)
         else:
             raise ValueError
 
-        br.add_attribute_color_cycles(object)
-        br.set_point_cloud_color(object)
+
 
         ### add camera
         br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
 
 
         ### light and shadow
-        light = Vector((0,0,br.object.dimensions[2]*6))
-        light = br.rotate(light,[0,math.pi/12,0])
+        light = Vector((0,0,br.object.dimensions[2]*2))
+        light = br.rotate(light,[math.pi/20,math.pi/20,0])
         br.add_light(light,model_dict[model]["light"])
 
 
-        if False:
+        if True:
             bpy.data.scenes["Scene"].frame_start = 0
             bpy.data.scenes["Scene"].frame_end = frames
             outfile = os.path.join(path,model,"renders",mode,'i')
@@ -646,7 +654,7 @@ if __name__ == "__main__":
             red = (1,0,0)
             if mode in ["dense_mesh"]:
                 br.set_freestyle_edge(object, color=red, thickness=thickness)
-            elif mode in ["polygon_mesh"]:
+            elif mode in ["polygon_mesh","polygon_mesh_detected"]:
                 br.set_freestyle_edge(object, color=green, thickness=thickness)
 
             bpy.data.scenes["Scene"].frame_start = frames+1
