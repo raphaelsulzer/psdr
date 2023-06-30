@@ -176,10 +176,90 @@ const Inexact_Plane & Shape_Container::get_plane(const size_t p) const
 	return support_planes_of_primitives[p];
 }
 
+void Shape_Container::inliers_to_ply(const string & filename)
+{
+    vector<CGAL::Color> colors;
+    vector<Pwn_vector> points;
+    Pwn_vector pwn;
+
+    size_t total_convex_hulls = size_of_inexact_convex_hulls();
+    pwn.reserve(total_convex_hulls);
+    colors.reserve(total_convex_hulls);
+
+    for (size_t p = 0; p < total_convex_hulls; ++p) {
+        if (is_primitive_degenerate(p)) continue;
+
+        pwn.clear();
+        const CGAL::Color & C = get_primitive_color(p);
+        colors.push_back(C);
+        get_inliers(p,pwn);
+        points.push_back(pwn);
+
+    }
+
+    auto pp = fs::path(filename).parent_path();
+    if(!fs::is_directory(pp))
+        fs::create_directories(pp);
+    std::ofstream stream(filename, std::ios::out);
+    if (!stream.is_open()){
+        throw std::ios_base::failure("Error : cannot write into an output file");
+    }
+
+    double dims[3];
+    dims[0] = SD->get_x_max() - SD->get_x_min();
+    dims[1] = SD->get_y_max() - SD->get_y_min();
+    dims[2] = SD->get_z_max() - SD->get_z_min();
+
+    int lg_max = 0;
+    for (int i = 0; i < 3; i++) {
+        int lg = (dims[i] == 0 ? 0 : log10(dims[i]));
+        if (lg > lg_max) {
+            lg_max = lg;
+        }
+    }
+
+    stream.precision(10 + lg_max);
+
+    size_t nb_pts = 0;
+    for (size_t i = 0; i < points.size(); i++) nb_pts += points[i].size();
+
+    stream << "ply" << std::endl;
+    stream << "format ascii 1.0" << std::endl;
+    stream << "element vertex " << nb_pts << std::endl;
+    stream << "property float x" << std::endl;
+    stream << "property float y" << std::endl;
+    stream << "property float z" << std::endl;
+    stream << "property float nx" << std::endl;
+    stream << "property float ny" << std::endl;
+    stream << "property float nz" << std::endl;
+    stream << "property uchar red" << std::endl;
+    stream << "property uchar green" << std::endl;
+    stream << "property uchar blue" << std::endl;
+    stream << "end_header" << std::endl;
+
+    // Vertices
+    for (size_t i = 0; i < points.size(); ++i) {
+        for (size_t j = 0; j < points[i].size(); ++j) {
+                stream  << get<0>(points[i][j]).x() << " " << get<0>(points[i][j]).y() << " " << get<0>(points[i][j]).z()
+                << " "  << get<1>(points[i][j]).x() << " " << get<1>(points[i][j]).y() << " " << get<1>(points[i][j]).z()
+                << " "  << (int)colors[i].r() << " " << (int)colors[i].g() << " " << (int)colors[i].b() << std::endl;
+        }
+    }
+
+    stream << std::endl;
+    stream.close();
+}
+
+
 void Shape_Container::to_ply(const string & filename, const string &  type)
 {
-    std::vector<std::vector<Inexact_Point_3> > points;
-    std::vector<CGAL::Color> colors;
+    if(type == "pointcloud"){
+        inliers_to_ply(filename);
+        return;
+    }
+
+    vector<vector<Inexact_Point_3> > points;
+    vector<CGAL::Color> colors;
 
     size_t total_convex_hulls = size_of_inexact_convex_hulls();
     points.reserve(total_convex_hulls);
@@ -189,6 +269,7 @@ void Shape_Container::to_ply(const string & filename, const string &  type)
         if (is_primitive_degenerate(p)) continue;
 
         const CGAL::Color & C = get_primitive_color(p);
+
 
         if (type == "alpha") {
             // Alpha-shapes

@@ -1,29 +1,32 @@
 # PSDR: Planar shape detection and refinement
 
+This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. 
+The source code is written in C++ and Python bindings are provided for the main functionality.
+
 <p float="left">
   <img style="width:800px;" src="./media/pointcloud.gif">
 </p>
 
-This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++. We also provide Python bindings for the main functionality.
+
 
 # Features
 
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
-- Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also implemented in CGAL)
-- Planar shape refinement based on an optimization finding the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
-- Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz).
+- Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also in [CGAL](https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RegionGrowing))
+- Planar shape refinement based on an optimization that seeks the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
+- Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz ,.ply).
 
 # Installation
 
-Simply clone the repository and install in a new conda environment using pip:
+Simply clone the repository and install PSDR in a new conda environment using `pip install .`. This will automatically install PSDR, the Python bindings, as well as all necessary dependencies.
 
 ```
 git clone https://github.com/raphaelsulzer/psdr.git
 cd psdr
 conda create --name psdr
-conda activate psdr
-pip install . 
+conda activate psdr 
+pip install .               
 ```
 
 You are now ready to use PSDR.
@@ -54,15 +57,14 @@ ps.save(example/data/anchor/alpha_shapes.ply,"alpha")
 ps.save(example/data/anchor/groups.vg)                              
 ps.save(example/data/anchor/groups.npz)                             
 ```
-
+For more Python examples see `example/python`.
 
 ## C++
 
-See `example/cpp` for a full example of a project that uses PSDR.
 
 ```
 auto SD = Shape_Detector();
-SD.load_points(example/data/anchor/convexes.ply);
+SD.load_points(example/data/anchor/pointcloud.ply);
 SD.set_detection_parameters(20,0.02,0.8,10);
 auto SC = Shape_Container(&SD);
 SC.detect();
@@ -70,6 +72,7 @@ SC.refine(10);
 SC.save(example/data/gargoyle/groups.npz);
 SC.save(example/data/gargoyle/rectangles.ply,"rectangle");
 ```
+For a full example cmake project that uses PSDR see `example/cpp`.
 
 
 

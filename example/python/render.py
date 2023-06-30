@@ -1,19 +1,13 @@
-import math
+import bpy, math, os
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('localhost', port=1090, stdoutToServer=True, stderrToServer=True)
-import os
 
-import bpy
 import numpy as np
-from pathlib import Path
-
 import blender_plots as bplt
 from scipy.spatial.transform import Rotation
 
 from glob import glob
 from pyntcloud import PyntCloud
-
-import sys
 
 from mathutils import Vector, Matrix
 
@@ -21,8 +15,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-
-imtype = "png"
+from .render_data import model_dict
 
 class MplColorHelper:
     """
@@ -123,6 +116,55 @@ class BlenderRender:
 
         bpy.context.scene.camera = self.camera
 
+
+    def add_rotating_camera(self, cam_folder, resolution=(1024, 1024), frames=None):
+
+        cam_files = glob(os.path.join(cam_folder,'*'))
+
+        cam_files = sorted(cam_files)
+        cam_file = os.path.join(cam_folder, cam_files[0])
+
+        cam_data = np.load(cam_file)
+        # get with C.scene.camera.location
+        location = cam_data["location"]
+        # get with C.scene.camera.matrix_world.to_euler()
+        orientation = cam_data["orientation"]
+
+        ## make camera and link it
+        camera_data = bpy.data.cameras.new("Camera")
+        self.camera = bpy.data.objects.new("Camera", camera_data)
+
+        # get camera location with C.scene.camera.location
+        self.camera.location = location
+        # get camera angle with C.scene.camera.matrix_world.to_euler()
+        self.camera.rotation_euler = orientation
+        self.coll.objects.link(self.camera)
+
+        # change camera size
+        bpy.context.scene.render.resolution_x = resolution[0]
+        bpy.context.scene.render.resolution_y = resolution[1]
+
+        keys = np.arange(0, frames + int(frames / (len(cam_files) -1 )), int(frames / (len(cam_files) - 1)))
+
+        for i,cf in enumerate(cam_files):
+
+            print("Add camera {} to key {}".format(cf,keys[i]))
+
+            cam_file = os.path.join(cam_folder, cf)
+            cam_data = np.load(cam_file)
+            location = cam_data["location"]
+            orientation = cam_data["orientation"]
+
+
+            self.camera.location = location
+            self.camera.rotation_euler = orientation
+            self.camera.keyframe_insert(data_path='location',frame=keys[i])
+            self.camera.keyframe_insert(data_path='rotation_euler',frame=keys[i])
+
+            # ttc=self.camera.constraints.new(type='TRACK_TO')
+            # ttc.target = self.object
+
+        bpy.context.scene.camera = self.camera
 
 
     def add_camera(self, cam_file, resolution=(1024, 1024), frames=None):
@@ -547,6 +589,8 @@ class BlenderRender:
 
 
 
+
+
 if __name__ == "__main__":
 
     # todo: in blender add three points: one camera start point, one camera stop point, and one point to look at (ie track with camera)
@@ -559,25 +603,6 @@ if __name__ == "__main__":
     mode = "dense_mesh"
     model = "city"
 
-    model_dict = dict()
-    model_dict["city"] = dict()
-    model_dict["city"]["rotation"] = None
-    model_dict["city"]["light"] = 20000
-    model_dict["city"]["point_size"] = 0.03
-    model_dict["city"]["light_rotation"] = [math.pi/5,-math.pi/5,0]
-
-
-    model_dict["bunny"] = dict()
-    model_dict["bunny"]["rotation"] = [-math.pi/2,0,0]
-    model_dict["bunny"]["light"] = 3**3
-    model_dict["bunny"]["point_size"] = 0.001
-    model_dict["bunny"]["light_rotation"] = [math.pi/20,math.pi/20,0]
-
-    model_dict["anchor"] = dict()
-    model_dict["anchor"]["rotation"] = None
-    model_dict["anchor"]["light"] = 50000
-    model_dict["anchor"]["point_size"] = 0.4
-    model_dict["anchor"]["light_rotation"] = [math.pi/20,math.pi/20,0]
 
 
     modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples"]

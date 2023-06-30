@@ -55,6 +55,7 @@ public:
 	Shape_Detector* SD;
 
     void to_ply(const string& filename, const string& type="convex");
+    void inliers_to_ply(const string & filename);
     int save(const string & filename, const string& type="convex");
 
 
