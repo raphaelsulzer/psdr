@@ -563,31 +563,35 @@ if __name__ == "__main__":
     model_dict["city"] = dict()
     model_dict["city"]["rotation"] = None
     model_dict["city"]["light"] = 20000
-    model_dict["city"]["point_size"] = 0.05
+    model_dict["city"]["point_size"] = 0.03
+    model_dict["city"]["light_rotation"] = [math.pi/5,-math.pi/5,0]
 
 
     model_dict["bunny"] = dict()
     model_dict["bunny"]["rotation"] = [-math.pi/2,0,0]
     model_dict["bunny"]["light"] = 3**3
     model_dict["bunny"]["point_size"] = 0.001
+    model_dict["bunny"]["light_rotation"] = [math.pi/20,math.pi/20,0]
 
     model_dict["anchor"] = dict()
     model_dict["anchor"]["rotation"] = None
     model_dict["anchor"]["light"] = 50000
     model_dict["anchor"]["point_size"] = 0.4
+    model_dict["anchor"]["light_rotation"] = [math.pi/20,math.pi/20,0]
 
 
     modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples"]
     modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples"]
+    modes = ["pointcloud","convexes_refined","convexes_refined_samples"]
     # modes = ["convexes_refined","convexes_refined_samples","pointcloud"]
     #
     # modes = ["convexes_refined_samples"]
     # modes = ["dense_mesh"]
 
     # modes = ["polygon_mesh_detected"]
-    # modes = ["polygon_mesh"]
+    # modes = ["pointcloud"]
 
-
+    debug = False
     for mode in modes:
 
         if mode in ["convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples","pointcloud"]:
@@ -635,12 +639,12 @@ if __name__ == "__main__":
 
 
         ### light and shadow
-        light = Vector((0,0,br.object.dimensions[2]*2))
-        light = br.rotate(light,[math.pi/20,math.pi/20,0])
+        light = Vector((0,0,br.object.dimensions[2]*5))
+        light = br.rotate(light,model_dict[model]["light_rotation"])
         br.add_light(light,model_dict[model]["light"])
 
 
-        if True:
+        if not debug:
             bpy.data.scenes["Scene"].frame_start = 0
             bpy.data.scenes["Scene"].frame_end = frames
             outfile = os.path.join(path,model,"renders",mode,'i')
@@ -648,7 +652,7 @@ if __name__ == "__main__":
             bpy.ops.render.render(write_still=False,animation=True)
             print("Renderer to", outfile)
 
-        if True:
+        if not debug:
             thickness = 0.5
             green = (0.0406086, 1, 0.038908)
             red = (1,0,0)
@@ -662,6 +666,14 @@ if __name__ == "__main__":
             outfile = os.path.join(path,model,"renders",mode,'i')
             bpy.context.scene.render.filepath = outfile
             bpy.ops.render.render(write_still=False,animation=True)
+            print("Renderer to", outfile)
+
+        if debug:
+            bpy.data.scenes["Scene"].frame_start = frames + 1
+            bpy.data.scenes["Scene"].frame_end = frames + 1
+            outfile = os.path.join(path, model, "renders", mode, 'i')
+            bpy.context.scene.render.filepath = outfile
+            bpy.ops.render.render(write_still=False, animation=True)
             print("Renderer to", outfile)
 
 
