@@ -1,12 +1,8 @@
 # PSDR: Planar shape detection and refinement
 
-
 <p float="left">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined/i0011.png">
+  <img style="width:800px;" src="./media/pointcloud.gif">
 </p>
-City 
-
 
 This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. The source code is written in C++. We also provide Python bindings for the main functionality.
 

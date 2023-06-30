@@ -589,7 +589,7 @@ if __name__ == "__main__":
     # modes = ["dense_mesh"]
 
     # modes = ["polygon_mesh_detected"]
-    # modes = ["pointcloud"]
+    modes = ["dense_mesh"]
 
     debug = False
     for mode in modes:
@@ -645,7 +645,7 @@ if __name__ == "__main__":
 
 
         if not debug:
-            bpy.data.scenes["Scene"].frame_start = 0
+            bpy.data.scenes["Scene"].frame_start = 130
             bpy.data.scenes["Scene"].frame_end = frames
             outfile = os.path.join(path,model,"renders",mode,'i')
             bpy.context.scene.render.filepath = outfile
