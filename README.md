@@ -14,7 +14,7 @@ The source code is written in C++ and Python bindings are provided for the main 
 - Planar shape refinement based on an optimization that seeks the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
 - Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz ,.ply).
 
-# Installation
+# :construction_worker: Installation
 
 Simply clone the repository and install PSDR in a new conda environment using `pip install .`. This will automatically install PSDR, the Python bindings, as well as all necessary dependencies.
 
