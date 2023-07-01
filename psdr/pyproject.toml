@@ -1,22 +1,20 @@
 [build-system]
-requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2", "spdlog >= 1.11.0"]
+requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2", "spdlog >= 1.11.0", "cgal >= 5.4.0", "pytest >= 7.4.0"]
+
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "pypsdr"
 version = "0.0.1"
-description = "Planar Shape Detection and Refinement in Python"
+description = "Planar Shape Detection and Refinement"
 readme = "../README.md"
 requires-python = ">=3.8"
 authors = [
     { name = "Raphael Sulzer", email = "raphaelsulzer@gmx.de" },
 ]
-classifiers = [
-    "License :: BSD",
-]
 
 [project.urls]
-Homepage = "https://github.com/wjakob/nanobind_example"
+Homepage = "https://github.com/raphaelsulzer/psdr"
 
 
 [tool.scikit-build]
@@ -24,7 +22,7 @@ Homepage = "https://github.com/wjakob/nanobind_example"
 minimum-version = "0.4"
 
 # Setuptools-style build caching in a local directory
-build-dir = "build/{wheel_tag}"
+build-dir = "build/scikit"
 
 # Build stable ABI wheels for CPython 3.12+
 wheel.py-api = "cp312"
@@ -32,11 +30,10 @@ wheel.py-api = "cp312"
 
 [tool.cibuildwheel]
 # Necessary to see build output from the actual compilation
-build-verbosity = 1
+build-verbosity = 3
 
 # Run pytest to ensure that the package was correctly built
-test-command = "pytest {project}/tests"
-test-requires = "pytest"
+test-command = "python -m unittest test.py"
 
 # Needed for full C++17 support
 [tool.cibuildwheel.macos.environment]

@@ -20,10 +20,12 @@ Simply clone the repository and install PSDR in a new conda environment using `p
 
 ```
 git clone https://github.com/raphaelsulzer/psdr.git
-cd psdr
+cd psdr/psdr
 conda create --name psdr
-conda activate psdr 
-pip install .               
+conda activate psdr
+conda install -y -c conda-forge xtensor xtensor-io spdlog
+pip install .
+python -m unittest test.py               
 ```
 
 You are now ready to use PSDR.
@@ -51,8 +53,9 @@ ps.refine(max_iter=-1)
 ps.save(example/data/anchor/convexes.ply,"convex")                  
 ps.save(example/data/anchor/rectangles.ply,"rectangles")            
 ps.save(example/data/anchor/alpha_shapes.ply,"alpha")               
-ps.save(example/data/anchor/groups.vg)                              
-ps.save(example/data/anchor/groups.npz)                             
+ps.save(example/data/anchor/point_groups.ply,"pointcloud")               
+ps.save(example/data/anchor/point_groups.vg)                              
+ps.save(example/data/anchor/point_groups.npz)                              
 ```
 For more Python examples see `example/python`.
 
@@ -69,11 +72,16 @@ SC.refine(10);
 SC.save(example/data/gargoyle/groups.npz);
 SC.save(example/data/gargoyle/rectangles.ply,"rectangle");
 ```
-For a full example cmake project that uses PSDR see `example/cpp`.
+For a cmake project that uses PSDR see `example/cpp`.
 
 
 
 # Examples
+
+## Refinement
+<p float="left">
+  <img style="width:800px;" src="./media/anchor.png">
+</p>
 
 ## Levels of detail
 <p float="left">
@@ -86,10 +94,7 @@ For a full example cmake project that uses PSDR see `example/cpp`.
 </p>
 
 
-## Refinement
-<p float="left">
-  <img style="width:800px;" src="./media/anchor.png">
-</p>
+
 
 # References
 

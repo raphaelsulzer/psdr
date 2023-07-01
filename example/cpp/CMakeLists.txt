@@ -31,8 +31,8 @@ find_package(xtensor-io REQUIRED)
 
 
 include_directories(../../psdr/include)
-link_directories(../../psdr/build/release)
-#link_directories(../../psdr/build/cp310-cp310-manylinux_2_35_x86_64)
+#link_directories(../../psdr/build/release)
+link_directories(../../psdr/build/scikit)
 
 ##############################
 ############ psdr ############
