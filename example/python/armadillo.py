@@ -4,10 +4,10 @@ from pypsdr import psdr
 
 params = dict()
 params["40"] = {"min_inliers":4000,"epsilon":5,"normal_th":0.5}
-# params["100"] = {"min_inliers":1000,"epsilon":4,"normal_th":0.5}
-# params["500"] = {"min_inliers":120,"epsilon":0.9,"normal_th":0.75}
-# params["2000"] = {"min_inliers":50,"epsilon":0.25,"normal_th":0.75}
-# params["10000"] = {"min_inliers":25,"epsilon":0.06,"normal_th":0.75}
+params["100"] = {"min_inliers":1000,"epsilon":4,"normal_th":0.5}
+params["500"] = {"min_inliers":120,"epsilon":0.9,"normal_th":0.75}
+params["2000"] = {"min_inliers":50,"epsilon":0.25,"normal_th":0.75}
+params["10000"] = {"min_inliers":25,"epsilon":0.06,"normal_th":0.75}
 
 model = "armadillo"
 

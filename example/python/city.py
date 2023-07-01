@@ -3,7 +3,6 @@ from pypsdr import psdr
 
 
 params = dict()
-params["anchor"] = {"epsilon":0.10,"min_inliers":50,"knn":10,"normal_th":0.8}
 params["city"] = {"min_inliers":120,"epsilon":0.05,"knn":10,"normal_th":0.9}
 params["bunny"] = {"min_inliers":500,"epsilon":0.08,"knn":10,"normal_th":0.8}
 

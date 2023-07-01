@@ -4,13 +4,10 @@ This repository contains a pipeline for planar shape detection [[1]](#references
 The source code is written in C++ and Python bindings are provided for the main functionality.
 
 <p float="left">
-  <img style="width:800px;" src="./media/pointcloud.gif">
+  <img style="width:800px;" src="./media/city.gif">
 </p>
 
-
-
 # Features
-
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
 - Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also in [CGAL](https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RegionGrowing))
@@ -78,35 +75,21 @@ For a full example cmake project that uses PSDR see `example/cpp`.
 
 # Examples
 
-## Increasing epsilon
+## Levels of detail
 <p float="left">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:800px;" src="./media/armadillo.png">
 </p>
-Angel 
 
-
-
-## Vertex groups, best rectangles, convex hulls, alpha shapes
+## Representations
 <p float="left">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:800px;" src="./media/tarbosaurus.png">
 </p>
-Gargoyle
 
-## Surface reconstructed from detected and refined
+
+## Refinement
 <p float="left">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
-  <img style="width:400px;" src="./media/renders/convexes_refined_samples/i0011.png">
+  <img style="width:800px;" src="./media/anchor.png">
 </p>
-Anchor
-
 
 # References
 
