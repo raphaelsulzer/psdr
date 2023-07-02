@@ -7,14 +7,14 @@ The source code is written in C++ and Python bindings are provided for the main 
   <img style="width:800px;" src="./media/city.gif">
 </p>
 
-# Features
+## :clipboard: Features
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
 - Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also in [CGAL](https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RegionGrowing))
 - Planar shape refinement based on an optimization that seeks the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
 - Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz ,.ply).
 
-# :construction_worker: Installation
+## :bricks: Installation
 
 Simply clone the repository and install PSDR in a new conda environment using `pip install .`. This will automatically install PSDR, the Python bindings, as well as all necessary dependencies.
 
@@ -31,10 +31,10 @@ python -m unittest test.py
 You are now ready to use PSDR.
 
 
-# Usage
+## :computer: Usage
 
 
-## Python
+### Python
 
 ```
 from pypsdr import psdr
@@ -59,7 +59,7 @@ ps.save(example/data/anchor/point_groups.npz)
 ```
 For more Python examples see `example/python`.
 
-## C++
+### C++
 
 
 ```
@@ -76,19 +76,19 @@ For a cmake project that uses PSDR see `example/cpp`.
 
 
 
-# Examples
+## :camera_flash: Examples
 
-## Refinement
+### Refinement
 <p float="left">
   <img style="width:800px;" src="./media/anchor.png">
 </p>
 
-## Levels of detail
+### Levels of detail
 <p float="left">
   <img style="width:800px;" src="./media/armadillo.png">
 </p>
 
-## Representations
+### Representations
 <p float="left">
   <img style="width:800px;" src="./media/tarbosaurus.png">
 </p>
@@ -96,7 +96,7 @@ For a cmake project that uses PSDR see `example/cpp`.
 
 
 
-# References
+## :book: References
 
 ```bibtex
 @article{1,
