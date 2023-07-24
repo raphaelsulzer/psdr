@@ -7,6 +7,9 @@ The source code is written in C++ and Python bindings are provided for the main 
   <img style="width:800px;" src="./media/city.gif">
 </p>
 
+# TODO: make a build.yml and test.yml for in github actions which builds and tests the repo at every push
+
+
 ## :clipboard: Features
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
@@ -16,7 +19,9 @@ The source code is written in C++ and Python bindings are provided for the main 
 
 ## :bricks: Installation
 
-Simply clone the repository and install PSDR in a new conda environment using `pip install .`. This will automatically install PSDR, the Python bindings, as well as all necessary dependencies.
+First, clone this repository, create a new conda environment called psdr and install all necessary dependencies. 
+Then install PSDR including its Python bindings  with `pip install .`. Make sure that the conda environment is activated for all steps.
+If all tests complete successfully you are ready to use PSDR.
 
 ```
 git clone https://github.com/raphaelsulzer/psdr.git
@@ -28,7 +33,6 @@ pip install .
 python -m unittest test.py               
 ```
 
-You are now ready to use PSDR.
 
 
 ## :computer: Usage
@@ -119,3 +123,17 @@ For a cmake project that uses PSDR see `example/cpp`.
   year={2022}
 }
 ```
+
+## Citation
+
+If you use this library in your work, please consider citing the above papers and this repository:
+```bibtex
+@misc{sulzer2023psdr,
+  author = {Sulzer, Raphael},
+  title = {PSDR: Planar shape detection and refinement},
+  year = {2023},
+  howpublished = {GitHub Repository},
+  url = {https://github.com/raphaelsulzer/psdr}
+}
+```
+

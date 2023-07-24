@@ -18,9 +18,16 @@ Shape_Container::Shape_Container(Shape_Detector* _SD)
 
 int Shape_Container::detect()
 {
-    SD->_logger->info("Detect planes...");
-    SD->_logger->info("epsilon = {}, min_inliers = {}, normal_threshold = {}, knn = {}",
-                       SD->get_epsilon(),SD->get_min_points(),SD->get_normal_threshold(),SD->get_knn());
+
+    if(SD->path_point_cloud_extension != ".vg"){
+        SD->_logger->info("Detect planes...");
+        SD->_logger->info("epsilon = {}, min_inliers = {}, normal_threshold = {}, knn = {}",
+                           SD->get_epsilon(),SD->get_min_points(),SD->get_normal_threshold(),SD->get_knn());
+    }
+    else{
+        SD->_logger->info("Load planar shapes from .vg file...");
+    }
+
 
 	SD->detect_shapes();
 	SD->set_primitives();

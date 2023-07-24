@@ -141,7 +141,9 @@ def make_gif(in_file,out_file):
 
     os.makedirs(os.path.split(out_file)[0],exist_ok=True)
 
-    command = '/usr/share/gifski-1.11.0/linux/gifski -r 20 --quality 100 --motion-quality 100 --lossy-quality 100 --output '+out_file+" "+in_file
+    # 24 to 30 fps is real time
+
+    command = '/usr/share/gifski-1.11.0/linux/gifski --fps 24 --quality 100 --motion-quality 100 --lossy-quality 100 --output '+out_file+" "+in_file
     command += " --width 800"
     print(*command)
     p=subprocess.Popen(command,shell=True)
@@ -167,7 +169,7 @@ if __name__ == "__main__":
     # methods = ["convexes_refined","colored_soup","polygon_mesh","dense_mesh"]
 
     ## city (psdr)
-    # model = "city"
+    model = "city"
     # methods = ["pointcloud", "convexes_refined"]
     # text = ["Input pointcloud", "Detected shapes"]
 
@@ -185,21 +187,28 @@ if __name__ == "__main__":
     # methods = ["pointgroups","convex_hull","alpha_shape","rectangle"]
 
     ## anchor
-    model = "anchor"
-    text = ["Detected","Refined","Detected","Refined"]
-    methods = ["pointgroups_detected","pointgroups_refined","convexes_detected","convexes_refined"]
+    # model = "anchor"
+    # text = ["Detected","Refined","Detected","Refined"]
+    # methods = ["pointgroups_detected","pointgroups_refined","convexes_detected","convexes_refined"]
+    #
 
-    out_path = "/home/rsulzer/cpp/psdr/example/data/{}/renders/gif".format(model)
-    # out_path = "/home/rsulzer/python/compod/example/data/city/renders/gif"
-    os.makedirs(out_path,exist_ok=True)
+    # outfpath for images and outfile for gif  PSDR
+    # out_path = "/home/rsulzer/cpp/psdr/example/data/{}/renders/gif".format(model)
+    # out_file = "/home/rsulzer/cpp/psdr/media/{}.gif".format(model)
 
-    prep_images(methods,out_path,text=text,slow_start=0,pause=0,arrange='4')
+    # outfpath for images and outfile for gif COMPOD
+    out_path = "/home/rsulzer/python/compod/example/data/{}/renders/gif".format(model)
+    out_file = "/home/rsulzer/python/compod/media/{}.gif".format(model)
+
+
+    # os.makedirs(out_path,exist_ok=True)
+    #
+    # prep_images(methods,out_path,text=text,slow_start=0,pause=0,arrange='4')
     # prep_images(["convexes_refined"],out_path,pause=80)
 
-    # out_file = "/home/rsulzer/python/compod/media/city.gif"
-    # out_file = "/media/armadillo.png"
-    # os.makedirs(os.path.split(out_file)[0],exist_ok=True)
-    # make_gif(out_path+"/*.png",out_file)
+    # out_file = "home/rsulzer/cpp/psdr/media/{}.gif".format(model)
+    os.makedirs(os.path.split(out_file)[0],exist_ok=True)
+    make_gif(out_path+"/*.png",out_file)
 
 
 

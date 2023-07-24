@@ -4,17 +4,14 @@ from pypsdr import psdr
 
 params = dict()
 params["city"] = {"min_inliers":120,"epsilon":0.05,"knn":10,"normal_th":0.9}
-params["bunny"] = {"min_inliers":500,"epsilon":0.08,"knn":10,"normal_th":0.8}
 
-model = "anchor"
-
+model = "city"
 
 ps = psdr(verbosity=1)
 
 file = "../data/{}/pointcloud/file.ply".format(model)
 os.makedirs(os.path.dirname(file),exist_ok=True)
 
-# file = "../data/{}/convexes_detected/file.vg".format(model)
 
 ps.load_points(file)
 

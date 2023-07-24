@@ -321,7 +321,7 @@ public:
 	double get_tolerance_angle() const;
 	double get_tolerance_coplanarity() const;
 
-protected:
+public:
     string path_point_cloud;
     string path_point_cloud_extension;
     string path_clusters;

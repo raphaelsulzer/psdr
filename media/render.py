@@ -39,9 +39,11 @@ class MplColorHelper:
 
 class BlenderRender:
 
-    def __init__(self):
+    def __init__(self,settings,remove_model=False):
 
-        self.remove_model = True
+        self.settings = settings
+
+        self.remove_model = remove_model
 
         self.rotation = None
 
@@ -262,8 +264,22 @@ class BlenderRender:
         colattr.data.foreach_set("color", cols)
 
 
+    def get_object_as_np_array(self,obj):
+
+        # from here: https://blog.michelanders.nl/2016/02/copying-vertices-to-numpy-arrays-in_4.html
+
+        verts = np.empty(len(obj.data.vertices) * 3, dtype=np.float64)
+        obj.data.vertices.foreach_get('co', verts)
+
+        verts=np.reshape(verts, (len(obj.data.vertices), 3))
+
+        rot = np.array(obj.matrix_world)[:3, :3]
+
+        return np.dot(verts,rot.transpose())
+
 
     def add_surface(self, file, rotation=None, color=None, use_vertex=False):
+
 
         ## get file and put it in scene collection
         bpy.ops.import_mesh.ply(filepath=file,use_verts=use_vertex)
@@ -329,7 +345,7 @@ class BlenderRender:
                    @ Matrix.Rotation(-rotation_vector[1], 4, "Y") \
                    @ Matrix.Rotation(-rotation_vector[2], 4, "Z")
 
-    def add_point_cloud(self, file, rotation=None, color=None):
+    def add_point_cloud_bplt_scatter(self, file, rotation=None, color=None):
 
 
         """this is the one to use for point cloud rendering"""
@@ -431,8 +447,11 @@ class BlenderRender:
 
         # radius = np.max(np.abs(self.model_bb[0]-self.model_bb[1]))
 
+        minz = np.min(self.get_object_as_np_array(self.object)[:,2])
+
         size = max(self.object.dimensions[0],self.object.dimensions[1])
-        location = Vector((self.object.location[0],self.object.location[1],self.object.location[2]-abs(self.object.dimensions[2]/2)))
+        # location = Vector((self.object.location[0],self.object.location[1],self.object.location[2]-(self.object.dimensions[2]/2)))
+        location = Vector((self.object.location[0],self.object.location[1],minz))
 
         bpy.ops.mesh.primitive_plane_add(size=size*4, location=location)
 
@@ -551,7 +570,7 @@ class BlenderRender:
 
 
 
-    def apply_render_settings(self, mode="normal"):
+    def apply_color_settings(self, mode="normal"):
 
 
         match mode:
@@ -584,7 +603,35 @@ class BlenderRender:
         bpy.context.scene.view_settings.gamma = 1.6
         bpy.context.scene.view_settings.look = 'High Contrast'
 
-def get_model_dict():
+    def add_point_cloud(self, file, rotation=None,color=None):
+
+        # this function requires the addon "import ply as verts" from the following link to be installed
+        # https://github.com/TombstoneTumbleweedArt/import-ply-as-verts
+
+        object = self.add_surface(file, rotation=rotation, color=color,
+                                use_vertex=True)
+        self.mesh_to_points(object, point_size=self.settings["point_size"])
+        self.add_attribute_color_cycles(object)
+        self.set_point_cloud_color(object)
+
+        return object
+
+
+    def set_light_and_shadow(self,light=True,shadow_catcher=True):
+
+        ### light and shadow
+        if light:
+            light = Vector((0, 0, self.object.dimensions[2] * 3.5))
+            light = self.rotate(light, self.settings["light_rotation"])
+            self.add_light(light, self.settings["light"])
+
+        if shadow_catcher:
+            self.add_shadow_catcher()
+
+
+
+
+def get_settings_dict(model):
     model_dict = dict()
     model_dict["city"] = dict()
     model_dict["city"]["rotation"] = None
@@ -593,13 +640,14 @@ def get_model_dict():
     model_dict["city"]["light_rotation"] = [math.pi / 5, -math.pi / 5, 0]
 
     model_dict["bunny"] = dict()
+    model_dict["bunny"]["camera_resolution"] = [600,600]
     model_dict["bunny"]["rotation"] = [-math.pi / 2, 0, 0]
-    model_dict["bunny"]["light"] = 3 ** 3
-    model_dict["bunny"]["point_size"] = 0.001
+    model_dict["bunny"]["light"] = 1
+    model_dict["bunny"]["point_size"] = 0.0005
     model_dict["bunny"]["light_rotation"] = [math.pi / 20, math.pi / 20, 0]
 
     model_dict["anchor"] = dict()
-    model_dict["anchor"]["resolution"] = [400,400]
+    model_dict["anchor"]["camera_resolution"] = [400,400]
     model_dict["anchor"]["rotation"] = None
     model_dict["anchor"]["light"] = 500000
     model_dict["anchor"]["point_size"] = 0.4
@@ -626,21 +674,25 @@ def get_model_dict():
     model_dict["default"]["point_size"] = 0.4
     model_dict["default"]["light_rotation"] = [math.pi / 20, math.pi / 20, 0]
 
-    return model_dict
+    return model_dict[model]
+
+def get_path(mode):
+    if mode in ["convexes_refined", "convexes_detected",
+                "pointgroups_refined", "pointgroups_detected",
+                "pointcloud", "alpha",
+                "pointgroups", "rectangle", "convex_hull", "alpha_shape"]:
+        path = "/home/rsulzer/cpp/psdr/example/data"
+    elif mode in ["colored_soup", "polygon_mesh", "dense_mesh", "polygon_mesh_detected","partition"]:
+        path = "/home/rsulzer/python/compod/example/data"
+    else:
+        print("Mode {} does not exist".format(mode))
+        raise ValueError
+    return path
 
 
-
-if __name__ == "__main__":
-
-
-    remove_model = False
-
-    path = "/example/data"
-    path = "/home/rsulzer/python/compod/example/data"
-    mode = "dense_mesh"
+def render_all():
     model = "anchor"
     model = "armadillo"
-
 
 
     modes = ["colored_soup","polygon_mesh","dense_mesh","pointcloud","convexes_refined","convexes_refined_samples","convexes_detected","convexes_detected_samples"]
@@ -654,37 +706,22 @@ if __name__ == "__main__":
     # modes = ["convexes_detected","pointgroups_detected","convexes_refined","pointgroups_refined"]
 
 
-    model_dict = get_model_dict()
+    settings = get_settings_dict(model)
 
     for scale in [40,100,500,2000,10000]:
     # for scale in [""]:
         # for scale in [40]:
         for mode in modes:
 
-            if mode in ["convexes_refined","convexes_detected",
-                        "pointgroups_refined", "pointgroups_detected",
-                        "pointcloud","alpha",
-                        "pointgroups","rectangle","convex_hull","alpha_shape"]:
-                path = "/home/rsulzer/cpp/psdr/example/data"
-            elif mode in ["colored_soup","polygon_mesh","dense_mesh","polygon_mesh_detected"]:
-                path = "/home/rsulzer/python/compod/example/data"
-            else:
-                print("Mode {} does not exist".format(mode))
-                raise ValueError
+            path = get_path(mode)
 
 
             frames = 150
 
-            br = BlenderRender()
-            br.remove_model = remove_model
-            br.apply_render_settings("color")
+            br = BlenderRender(settings)
+            br.apply_color_settings("color")
             # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
             br.apply_global_render_settings(renderer='CYCLES', samples=512)
-
-            # object = br.add_point_cloud(os.path.join(path,model,"pointcloud.ply"), rotation=[math.pi/2,math.pi,0])
-            # object = br.add_surface(os.path.join(path,model,"convexes_refined/file.ply"))
-
-            # object = br.add_surface(os.path.join(path,model,"colored_soup/file.ply"))
 
 
             if mode in ["colored_soup","polygon_mesh","polygon_mesh_detected","dense_mesh",
@@ -693,32 +730,20 @@ if __name__ == "__main__":
                 object = br.add_surface(os.path.join(path,model,mode,"file{}.ply".format(scale)),color=[0.8,0.8,0.8,1],rotation=model_dict[model]["rotation"])
                 br.add_attribute_color_cycles(object)
             elif mode in ["pointcloud"]:
-                object = br.add_surface(os.path.join(path,model,mode,"file.ply"),color=[0.8,0.8,0.8,1],rotation=model_dict[model]["rotation"],use_vertex=True)
-                br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
-                br.add_attribute_color_cycles(object)
-                br.set_point_cloud_color(object)
+                object = br.add_point_cloud(os.path.join(path,model,mode,"file.ply"),color=[0.8,0.8,0.8,1],rotation=model_dict[model]["rotation"])
             elif mode in ["pointgroups_refined","pointgroups_detected","pointgroups"]:
-                object = br.add_surface(os.path.join(path,model,mode,"file.ply"),rotation=model_dict[model]["rotation"],use_vertex=True)
-                br.mesh_to_points(object,point_size=model_dict[model]["point_size"])
-                br.add_attribute_color_cycles(object)
-                br.set_point_cloud_color(object)
+                object = br.add_point_cloud(file=os.path.join(path, model, mode, "file.ply"),rotation=model_dict[model]["rotation"])
             else:
                 print("Mode {} does not exist".format(mode))
                 raise ValueError
 
 
 
+            br.set_light_and_shadow()
+
             ### add camera
             # br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
-            br.add_camera(os.path.join(path,model,"cameras","1.npz"), model_dict[model]["resolution"])
-
-
-            ### light and shadow
-            light = Vector((0,0,br.object.dimensions[2]*3.5))
-            light = br.rotate(light,model_dict[model]["light_rotation"])
-            br.add_light(light,model_dict[model]["light"])
-
-            br.add_shadow_catcher()
+            br.add_camera(os.path.join(path, model, "cameras", "1.npz"), self.settings["camera_resolution"])
 
 
             if True:
@@ -730,13 +755,10 @@ if __name__ == "__main__":
                 print("Renderer to", outfile)
 
             if False:
-                thickness = 0.5
-                green = (0.0406086, 1, 0.038908)
-                red = (1,0,0)
                 if mode in ["dense_mesh"]:
-                    br.set_freestyle_edge(object, color=red, thickness=thickness)
+                    br.set_freestyle_edge(object, color=(1,0,0), thickness=0.5)
                 elif mode in ["polygon_mesh","polygon_mesh_detected"]:
-                    br.set_freestyle_edge(object, color=green, thickness=thickness)
+                    br.set_freestyle_edge(object, color=(0.0406086, 1, 0.038908), thickness=0.5)
 
                 bpy.data.scenes["Scene"].frame_start = frames+1
                 bpy.data.scenes["Scene"].frame_end = frames+1
@@ -761,6 +783,53 @@ if __name__ == "__main__":
                 bpy.data.objects.remove(br.camera, do_unlink=True)
 
             del br
+
+
+def render_bunny():
+
+    model = "bunny"
+
+    settings = get_settings_dict(model)
+
+    br = BlenderRender(settings)
+    br.apply_color_settings("color")
+    # br.apply_global_render_settings(renderer='BLENDER_WORKBENCH', samples=5)
+    br.apply_global_render_settings(renderer='CYCLES', samples=16)
+
+    ## point cloud
+    # br.add_point_cloud(os.path.join(get_path("pointcloud"), model, "pointcloud", "file.ply"),rotation=settings["rotation"])
+
+    ## add polygons
+    # object=br.add_surface(os.path.join(get_path("convexes_detected"), model, "convexes_detected", "file.ply"),rotation=settings["rotation"])
+    # br.add_attribute_color_cycles(object)
+
+    ## add partition step by step
+    # for i in range()
+    # object=br.add_surface(os.path.join(get_path("convexes_detected"), model, "convexes_detected", "file.ply"),rotation=settings["rotation"])
+    # br.add_attribute_color_cycles(object)
+
+    ## need to probably use wireframe modifier again for displaying the partition
+    object=br.add_surface(os.path.join(get_path("partition"), model, "partition", "file.ply"),rotation=settings["rotation"])
+    br.add_attribute_color_cycles(object)
+
+    br.set_freestyle_edge(object, color=(1, 0, 0), thickness=2)
+
+    br.set_light_and_shadow()
+
+
+    ## add camera
+    # br.add_moving_camera(os.path.join(path,model,"cameras"), br.resolution, frames = frames)
+    br.add_camera(os.path.join(get_path("pointcloud"), model, "cameras", "1.npz"), settings["camera_resolution"])
+
+
+if __name__ == "__main__":
+
+    # render_all()
+    render_bunny()
+
+
+
+
 
 
 
