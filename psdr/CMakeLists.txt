@@ -34,7 +34,6 @@ execute_process(
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
-#find_package(Eigen3 REQUIRED PATHS ../../eigen)
 find_package(Eigen3 REQUIRED PATHS $CONDA_PREFIX/include/eigen3)
 message("Eigen include dir: " ${EIGEN3_INCLUDE_DIR})
 find_package(yaml-cpp REQUIRED)
