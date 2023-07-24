@@ -29,9 +29,12 @@ jobs:
       - name: install eigen
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt -y install libmpfr-dev
-      - name: fix eigen
+#      - name: fix eigen
+#        shell: bash -el {0}
+#        run: ln -s $CONDA/envs/psdr/include/eigen3/Eigen $CONDA/envs/psdr/include/Eigen && ln -s $CONDA/envs/psdr/include/eigen3/unsupported $CONDA/envs/psdr/include/unsupported
+      - name: list conda env include
         shell: bash -el {0}
-        run: ln -s $CONDA/envs/psdr/include/eigen3/Eigen $CONDA/envs/psdr/include/Eigen && ln -s $CONDA/envs/psdr/include/eigen3/unsupported $CONDA/envs/psdr/include/unsupported
+        run: ls $CONDA/envs/psdr/include/
       - name: pip install
         shell: bash -el {0}
         run: pip install psdr/.
