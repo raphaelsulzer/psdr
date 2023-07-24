@@ -1,6 +1,6 @@
 # PSDR: Planar shape detection and refinement
 
-![build](https://github.com/raphaelsulzer/psdr/actions/workflows/build.yml/badge.svg)
+![Build and Test](https://github.com/raphaelsulzer/psdr/actions/workflows/build.yml/badge.svg)
 
 This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. 
 The source code is written in C++ and Python bindings are provided for the main functionality.
@@ -31,6 +31,10 @@ cd psdr/psdr
 conda create --name psdr
 conda activate psdr
 conda install -y -c conda-forge xtensor xtensor-io spdlog cgal anaconda::mpfr yaml-cpp omnia::eigen3
+# symlink eigen3/Eigen to Eigen (Windows)
+ln -s $CONDA_PREFIX/Library/include/eigen3/Eigen $CONDA_PREFIX/Library/include/Eigen
+# symlink eigen3/Eigen to Eigen (Linux and MacOS)
+ln -s $CONDA_PREFIX/include/eigen3/Eigen $CONDA_PREFIX/include/Eigen
 pip install .
 python -m unittest test.py               
 ```

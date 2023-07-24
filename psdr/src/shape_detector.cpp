@@ -14,6 +14,11 @@
 
 using namespace std;
 
+
+// for Windows
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 Shape_Detector::Shape_Detector()
 {
 
