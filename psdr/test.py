@@ -11,7 +11,7 @@ class MyTestCase(unittest.TestCase):
         EXAMPLE_DIR = os.path.join(os.path.dirname(__file__), "..", "example","data","anchor")
         print(EXAMPLE_DIR)
         ps = psdr(verbosity=1)
-        ps.load_points(os.path.join(EXAMPLE_DIR,"pointcloud","file.ply"))
+        ps.load_points(os.path.join(os.path.dirname(__file__), "..", "example","anchor.ply"))
         ps.detect(epsilon=0.10,min_inliers=50)
         ps.refine(max_iter=-1)
         os.makedirs(os.path.join(EXAMPLE_DIR,"convex_hulls"), exist_ok=True)

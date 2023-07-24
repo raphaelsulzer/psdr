@@ -4,7 +4,6 @@ build
 build/*
 CMakeLists.txt.user
 .idea
-example/data
-!example/data/anchor/pointcloud/file.ply
+example/data/
 psdr/build
 example/cpp/build
