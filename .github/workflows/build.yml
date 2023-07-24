@@ -33,7 +33,7 @@ jobs:
       - name: list conda env include windows
         if: matrix.os == 'windows-latest'
         shell: bash -el {0}
-        run: dir $CONDA/envs/psdr/include/
+        run: dir $CONDA/envs/psdr/Library/include/
       - name: list conda env include other
         if: matrix.os != 'windows-latest'
         shell: bash -el {0}
@@ -41,7 +41,11 @@ jobs:
       - name: fix eigen
         if: matrix.os != 'windows-latest'
         shell: bash -el {0}
-        run: ln -s $CONDA/envs/psdr/include/eigen3/Eigen $CONDA/envs/psdr/include/Eigen && ln -s $CONDA/envs/psdr/include/eigen3/unsupported $CONDA/envs/psdr/include/unsupported
+        run: ln -s $CONDA/envs/psdr/include/eigen3/Eigen $CONDA/envs/psdr/include/Eigen
+      - name: fix eigen windows
+        if: matrix.os == 'windows-latest'
+        shell: bash -el {0}
+        run: ln -s $CONDA/envs/psdr/Library/include/eigen3/Eigen $CONDA/envs/psdr/Library/include/Eigen
       - name: pip install
         shell: bash -el {0}
         run: pip install psdr/.
