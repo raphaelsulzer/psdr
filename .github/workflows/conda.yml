@@ -18,14 +18,18 @@ jobs:
     steps:
       - uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: psdr
           auto-update-conda: true
 #          python-version: ${{ matrix.python-version }}
-      - name: Conda info
+      - name: install dependencies
         shell: bash -el {0}
-        run: conda info
-      - name: Conda list
-        shell: pwsh
-        run: conda list
+        run: conda install -y -c conda-forge xtensor xtensor-io spdlog
+      - name: pip install
+        shell: bash -el {0}
+        run: pip install .
+      - name: run tests
+        shell: bash -el {0}
+        run: python -m unittest test.py
 #  install-conda-dependencies:
 #    name: Install dependencies
 
