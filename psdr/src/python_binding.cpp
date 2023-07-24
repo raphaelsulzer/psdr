@@ -13,7 +13,7 @@ using namespace std;
 namespace nb = nanobind;
 using namespace nb::literals;
 
-pyPSDR::pyPSDR(int verbosity = 0){
+pyPSDR::pyPSDR(int verbosity){
 
     _SD = Shape_Detector();
     _SC = Shape_Container(&_SD);

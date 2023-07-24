@@ -11,7 +11,7 @@ class pyPSDR
 {
 public:
 //    std::shared_ptr<spdlog::logger> _logger;
-    pyPSDR(int verbosity);
+    pyPSDR(int verbosity = 0);
 //    ~pyPSDR();
 
     Shape_Detector _SD;
