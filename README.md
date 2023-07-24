@@ -32,7 +32,7 @@ git clone https://github.com/raphaelsulzer/psdr.git
 cd psdr/psdr
 conda create --name psdr
 conda activate psdr
-conda install -y -c conda-forge xtensor xtensor-io spdlog
+conda install -y -c conda-forge xtensor xtensor-io spdlog cgal
 pip install .
 python -m unittest test.py               
 ```

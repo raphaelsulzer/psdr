@@ -14,12 +14,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ######################################################
 ###################### EXTERNAL ######################
 ######################################################
-find_package(CGAL QUIET REQUIRED)
+find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
 ## issues with eigen? Do this: https://stackoverflow.com/a/25537967
 
-set(CONDA_ENV "ksr3")
-set(Python_ROOT_DIR "/opt/miniconda3/envs/${CONDA_ENV}/bin")
+if(NOT SKBUILD)
+    set(CONDA_ENV "ksr3")
+    set(Python_ROOT_DIR "/opt/miniconda3/envs/${CONDA_ENV}/bin")
+endif()
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 include_directories(${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
 

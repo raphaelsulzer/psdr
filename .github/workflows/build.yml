@@ -1,4 +1,4 @@
-name: conda
+name: build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  install-conda:
+  build-psdr:
     name: Install minicondaconda, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: install dependencies
         shell: bash -el {0}
-        run: conda install -y -c conda-forge xtensor xtensor-io spdlog
+        run: conda install -y -c conda-forge xtensor xtensor-io spdlog cgal
       - name: pip install
         shell: bash -el {0}
         run: pip install psdr/.
