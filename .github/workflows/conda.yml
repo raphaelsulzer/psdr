@@ -21,7 +21,7 @@ jobs:
           activate-environment: psdr
           auto-update-conda: true
 #          python-version: ${{ matrix.python-version }}
-      - uses: actions/checkout@v
+      - uses: actions/checkout@v3
       - name: install dependencies
         shell: bash -el {0}
         run: conda install -y -c conda-forge xtensor xtensor-io spdlog

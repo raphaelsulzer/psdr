@@ -1,7 +1,8 @@
 # PSDR: Planar shape detection and refinement
 
-![example workflow]
-(https://github.com/raphaelsulzer/psdr/blob/main/.github/workflows/conda.yml/badge.svg)
+![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+
+![build](https://github.com/raphaelsulzer/psdr/actions/workflows/conda.yml/badge.svg)
 
 This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. 
 The source code is written in C++ and Python bindings are provided for the main functionality.
