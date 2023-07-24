@@ -28,7 +28,7 @@ jobs:
         run: conda install -y -c conda-forge -c omnia xtensor xtensor-io spdlog cgal mpfr yaml-cpp omnia::eigen3
       - name: install eigen
         if: matrix.os == 'ubuntu-latest'
-          run: sudo apt install libmpfr-dev`
+        run: sudo apt install libmpfr-dev`
       - name: fix eigen
         shell: bash -el {0}
         run: ln -s $CONDA/envs/psdr/include/eigen3/Eigen $CONDA/envs/psdr/include/Eigen && ln -s $CONDA/envs/psdr/include/eigen3/unsupported $CONDA/envs/psdr/include/unsupported
