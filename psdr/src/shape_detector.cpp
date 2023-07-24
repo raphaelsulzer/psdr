@@ -1,7 +1,7 @@
 #include "shape_detector.h"
 #include "shape_detector_index_map.h"
 #include <CGAL/IO/read_ply_points.h>
-#include <CGAL/Shape_regularization/regularize_planes.h>
+//#include <CGAL/Shape_regularization/regularize_planes.h>
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/compute_average_spacing.h>
 #include <CGAL/estimate_scale.h>
@@ -11,7 +11,6 @@
 #include <boost/filesystem.hpp>
 #include <random>
 #include <math.h>
-
 
 using namespace std;
 
@@ -127,17 +126,16 @@ bool Shape_Detector::load_ply()
 
 
 	if (s == "format ascii 1.0") {
-
 		std::ifstream stream(path_point_cloud);
-        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+//        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+        if (!stream || !CGAL::read_ply_points(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
             return 1;
 		}
 	}
 	else {
 		std::ifstream stream(path_point_cloud, std::ios_base::binary);
-
-
-        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+//        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+        if (!stream || !CGAL::read_ply_points(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
             return 1;
 		}
 	}
@@ -727,12 +725,12 @@ void Shape_Detector::detect_shapes()
 
 
 
-void Shape_Detector::regularize_shapes()
-{
-	regularize_planes();
-	discretize_planes();
-	get_coverage_and_mean_error();
-}
+//void Shape_Detector::regularize_shapes()
+//{
+//	regularize_planes();
+//	discretize_planes();
+//	get_coverage_and_mean_error();
+//}
 
 
 void Shape_Detector::refine_shapes(int mi) {
@@ -8188,24 +8186,24 @@ bool Shape_Detector::inliers_arent_aligned(const std::vector<int> & inds)
 }
 
 
-void Shape_Detector::regularize_planes()
-{
-	clock_t t_regularize_start = clock();
-	planes_1 = planes_0;
+//void Shape_Detector::regularize_planes()
+//{
+//	clock_t t_regularize_start = clock();
+//	planes_1 = planes_0;
 
-    CGAL::Shape_regularization::Planes::regularize_planes(points,
-			Point_map(),
-			planes_1,
-			CGAL::Identity_property_map<Inexact_Plane>(),
-			Shape_Detector_Index_Map(inliers_to_planes),
-			true, true, true, false,
-			tolerance_angle,
-			tolerance_coplanarity,
-			Inexact_Vector_3(0, 0, 1));
+//    CGAL::Shape_regularization::Planes::regularize_planes(points,
+//			Point_map(),
+//			planes_1,
+//			CGAL::Identity_property_map<Inexact_Plane>(),
+//			Shape_Detector_Index_Map(inliers_to_planes),
+//			true, true, true, false,
+//			tolerance_angle,
+//			tolerance_coplanarity,
+//			Inexact_Vector_3(0, 0, 1));
 
-	clock_t t_regularize_end = clock();
-    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
-}
+//	clock_t t_regularize_end = clock();
+//    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
+//}
 
 
 void Shape_Detector::get_coverage_and_mean_error()

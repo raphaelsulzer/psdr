@@ -49,8 +49,7 @@ typedef pair<Inexact_Point_3, Inexact_Vector_3> Point_with_normal;
 typedef vector<Point_with_normal> Pwn_vector;
 typedef CGAL::First_of_pair_property_map<Point_with_normal> Point_map;
 typedef CGAL::Second_of_pair_property_map<Point_with_normal> Normal_map;
-typedef CGAL::Shape_detection::Shape_detection_traits
-<CGAL::Exact_predicates_inexact_constructions_kernel, Pwn_vector, Point_map, Normal_map> Traits;
+//typedef CGAL::Shape_detection::Shape_detection_traits<CGAL::Exact_predicates_inexact_constructions_kernel, Pwn_vector, Point_map, Normal_map> Traits;
 #ifdef CGAL_LINKED_WITH_TBB
 typedef CGAL::Parallel_tag Concurrency_tag;
 #else
@@ -133,7 +132,7 @@ public:
 
 	void load_shapes();
 
-	void regularize_shapes();
+//	void regularize_shapes();
 
     void refine_shapes(int mi);
 
@@ -160,7 +159,7 @@ public:
 protected:
     void detect_planes();
 
-	void regularize_planes();
+//	void regularize_planes();
 
 	void discretize_planes();
 

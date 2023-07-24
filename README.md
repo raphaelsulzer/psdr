@@ -30,7 +30,7 @@ git clone https://github.com/raphaelsulzer/psdr.git
 cd psdr/psdr
 conda create --name psdr
 conda activate psdr
-conda install -y -c conda-forge xtensor xtensor-io spdlog cgal mpfr
+conda install -y -c conda-forge xtensor xtensor-io spdlog cgal anaconda::mpfr yaml-cpp omnia::eigen3
 pip install .
 python -m unittest test.py               
 ```
