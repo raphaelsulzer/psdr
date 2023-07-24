@@ -21,24 +21,22 @@ The source code is written in C++ and Python bindings are provided for the main 
 
 ## :bricks: Installation
 
-First, clone this repository, create a new conda environment called psdr and install all necessary dependencies. 
-Then install PSDR including its Python bindings  with `pip install .`. Make sure that the conda environment is activated for all steps.
-If all tests complete successfully you are ready to use PSDR.
+First, clone this repository and create a new conda environment called psdr. Then, install and test PSDR, its Python bindings and all necessary dependencies.
 
 ```
 git clone https://github.com/raphaelsulzer/psdr.git
-cd psdr/psdr
-conda create --name psdr
-conda activate psdr
+cd psdr
+conda create --name psdr && conda activate psdr
 conda install -y -c conda-forge xtensor xtensor-io spdlog cgal anaconda::mpfr yaml-cpp omnia::eigen3
-# symlink eigen3/Eigen to Eigen (Windows)
+# symlink eigen3/Eigen to Eigen (Windows only)
 ln -s $CONDA_PREFIX/Library/include/eigen3/Eigen $CONDA_PREFIX/Library/include/Eigen
-# symlink eigen3/Eigen to Eigen (Linux and MacOS)
+# symlink eigen3/Eigen to Eigen (Linux/MacOS only)
 ln -s $CONDA_PREFIX/include/eigen3/Eigen $CONDA_PREFIX/include/Eigen
-pip install .
+pip install psdr/.
 python -m unittest test.py               
 ```
 
+If all tests complete successfully you are ready to use PSDR.
 
 
 ## :computer: Usage
