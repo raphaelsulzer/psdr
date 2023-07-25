@@ -1,4 +1,4 @@
-name: build
+name: Build (Linux / macOS / Windows) and Test
 
 on:
   push:
@@ -52,6 +52,4 @@ jobs:
       - name: run tests
         shell: bash -el {0}
         run: python -m unittest psdr/test.py
-#  install-conda-dependencies:
-#    name: Install dependencies
 

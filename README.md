@@ -1,8 +1,8 @@
 # PSDR: Planar shape detection and refinement
 
-![Build and Test](https://github.com/raphaelsulzer/psdr/actions/workflows/build.yml/badge.svg)
+![build](https://github.com/raphaelsulzer/psdr/actions/workflows/build.yml/badge.svg)
 
-This repository contains a pipeline for planar shape detection [[1]](#references) and refinement [[2]](#references) from point clouds. 
+This repository contains a pipeline for planar shape detection [[1]](#book-references) and refinement [[2]](#book-references) from point clouds. 
 The source code is written in C++ and Python bindings are provided for the main functionality.
 
 <p float="left">
@@ -12,8 +12,8 @@ The source code is written in C++ and Python bindings are provided for the main 
 ## :clipboard: Features
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
-- Planar shape detection based on a robust and efficient region growing algorithm [[1]](#references) (also in [CGAL](https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RegionGrowing))
-- Planar shape refinement based on an optimization that seeks the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#references)
+- Planar shape detection based on a robust and efficient region growing algorithm [[1]](#book-references) (also in [CGAL](https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RegionGrowing))
+- Planar shape refinement based on an optimization that seeks the best trade-off between fidelity, completeness and simplicity of the configuration [[2]](#book-references)
 - Writing of planar shapes as 2D convex hulls, alpha shapes or minimal rectangles (.ply) or as vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz ,.ply).
 
 ## :bricks: Installation
@@ -62,10 +62,9 @@ ps.save("example/data/anchor/point_groups.ply","pointcloud")
 ps.save("example/data/anchor/point_groups.vg")                              
 ps.save("example/data/anchor/point_groups.npz")                              
 ```
-For more Python examples see `example/python`.
+For more Python examples see the `example/python` folder.
 
 ### C++
-
 
 ```
 auto SD = Shape_Detector();
@@ -77,8 +76,7 @@ SC.refine(10);
 SC.save("example/data/gargoyle/groups.npz");
 SC.save("example/data/gargoyle/rectangles.ply","rectangle");
 ```
-For a cmake project that uses PSDR see `example/cpp`.
-
+For a cmake project that uses PSDR see the `example/cpp` folder.
 
 
 ## :camera_flash: Examples
@@ -97,9 +95,6 @@ For a cmake project that uses PSDR see `example/cpp`.
 <p float="left">
   <img style="width:800px;" src="./media/tarbosaurus.png">
 </p>
-
-
-
 
 ## :book: References
 
