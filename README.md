@@ -44,17 +44,19 @@ If all tests complete successfully you are ready to use PSDR.
 ```
 from pypsdr import psdr
 
-# initialise a planar shape detector and load input points                                              
-ps = psdr(verbosity=1)                                               
-ps.load_points(example/data/anchor/pointcloud.ply)
+# initialise a planar shape detector                                    
+ps = psdr(verbosity=1)              
 
-# detect planar shapes with default values
-ps.detect(min_inliers=20,epsilon=0.02,normal_th=0.8,knn=10)
+# load input point cloud                                         
+ps.load_points("example/data/anchor/pointcloud.ply")
+
+# detect planar shapes
+ps.detect(epsilon=0.10,min_inliers=50,knn=10,normal_th=0.8)
 
 # refine planar shape configuration until convergence (i.e. no limit on number of iterations)
 ps.refine(max_iter=-1)
 
-# export planar shapes and vertex groups  
+# export planar shapes
 ps.save("example/data/anchor/convexes.ply","convex")                  
 ps.save("example/data/anchor/rectangles.ply","rectangles")            
 ps.save("example/data/anchor/alpha_shapes.ply","alpha")               
