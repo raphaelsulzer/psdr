@@ -9,9 +9,6 @@ The source code is written in C++ and Python bindings are provided for the main 
   <img style="width:800px;" src="./media/city.gif">
 </p>
 
-# TODO: make a build.yml and test.yml for in github actions which builds and tests the repo at every push
-
-
 ## :clipboard: Features
 
 - Reading of point clouds (.ply) or vertex groups ([.vg](https://abspy.readthedocs.io/en/latest/vertexgroup.html), .npz) as input
