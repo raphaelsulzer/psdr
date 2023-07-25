@@ -7,3 +7,6 @@ CMakeLists.txt.user
 example/data/
 psdr/build
 example/cpp/build
+psdr/__pycache__
+example/python/__pycache__
+__pycache__/*
