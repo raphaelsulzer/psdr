@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]){
     if(argc > 1)
         pointcloud_file = argv[1];
     else
-        pointcloud_file = "/home/rsulzer/cpp/psdr/example/data/bunny/convexes_detected/file.vg";
+        pointcloud_file = "../../../anchor.ply";
 
     logger->info("Detect planar shapes...");
     logger->debug("Load pointcloud from {}",pointcloud_file);

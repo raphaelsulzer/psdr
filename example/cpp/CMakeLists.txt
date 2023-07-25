@@ -19,9 +19,7 @@ include(${CGAL_USE_FILE})
 
 
 find_package(Boost REQUIRED COMPONENTS system filesystem thread serialization program_options)
-
-
-find_package(Eigen3 QUIET REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(xtl REQUIRED) # for xtensor
@@ -31,8 +29,9 @@ find_package(xtensor-io REQUIRED)
 
 
 include_directories(../../psdr/include)
-#link_directories(../../psdr/build/release)
+# make sure to include psdr build which was generated with the same environment
 link_directories(../../psdr/build/scikit)
+#link_directories(../../psdr/build/release)
 
 ##############################
 ############ psdr ############

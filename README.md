@@ -55,12 +55,12 @@ ps.detect(min_inliers=20,epsilon=0.02,normal_th=0.8,knn=10)
 ps.refine(max_iter=-1)
 
 # export planar shapes and vertex groups  
-ps.save(example/data/anchor/convexes.ply,"convex")                  
-ps.save(example/data/anchor/rectangles.ply,"rectangles")            
-ps.save(example/data/anchor/alpha_shapes.ply,"alpha")               
-ps.save(example/data/anchor/point_groups.ply,"pointcloud")               
-ps.save(example/data/anchor/point_groups.vg)                              
-ps.save(example/data/anchor/point_groups.npz)                              
+ps.save("example/data/anchor/convexes.ply","convex")                  
+ps.save("example/data/anchor/rectangles.ply","rectangles")            
+ps.save("example/data/anchor/alpha_shapes.ply","alpha")               
+ps.save("example/data/anchor/point_groups.ply","pointcloud")               
+ps.save("example/data/anchor/point_groups.vg")                              
+ps.save("example/data/anchor/point_groups.npz")                              
 ```
 For more Python examples see `example/python`.
 
@@ -74,8 +74,8 @@ SD.set_detection_parameters(20,0.02,0.8,10);
 auto SC = Shape_Container(&SD);
 SC.detect();
 SC.refine(10);
-SC.save(example/data/gargoyle/groups.npz);
-SC.save(example/data/gargoyle/rectangles.ply,"rectangle");
+SC.save("example/data/gargoyle/groups.npz");
+SC.save("example/data/gargoyle/rectangles.ply","rectangle");
 ```
 For a cmake project that uses PSDR see `example/cpp`.
 
