@@ -37,7 +37,7 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Shape_detection/Region_growing/Region_growing.h>
 #include <CGAL/IO/read_ply_points.h>
-#include <CGAL/Shape_detection/Region_growing/Region_growing_on_point_set.h>
+//#include <CGAL/Shape_detection/Region_growing/Region_growing_on_point_set.h>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

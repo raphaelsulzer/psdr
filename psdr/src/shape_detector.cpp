@@ -1,7 +1,6 @@
 #include "shape_detector.h"
 #include "shape_detector_index_map.h"
 #include <CGAL/IO/read_ply_points.h>
-//#include <CGAL/Shape_regularization/regularize_planes.h>
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/compute_average_spacing.h>
 #include <CGAL/estimate_scale.h>
