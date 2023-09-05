@@ -1,8 +1,8 @@
-# PSDR: Planar shape detection and refinement
+# pyPSDR: Planar Shape Detection from Point Clouds
 
 ![build](https://github.com/raphaelsulzer/psdr/actions/workflows/build.yml/badge.svg)
 
-This repository contains a pipeline for planar shape detection [[1]](#book-references) and refinement [[2]](#book-references) from point clouds. 
+This repository contains a pipeline for planar shape detection [[1](#book-references), [2](#book-references)] from point clouds. 
 The source code is written in C++ and Python bindings are provided for the main functionality.
 
 <p float="left">
@@ -25,9 +25,9 @@ git clone https://github.com/raphaelsulzer/psdr.git
 cd psdr
 conda create --name psdr && conda activate psdr
 conda install -y -c conda-forge xtensor xtensor-io spdlog cgal anaconda::mpfr yaml-cpp omnia::eigen3
-# symlink eigen3/Eigen to Eigen (Windows only)
+# Windows only: symlink eigen3/Eigen to Eigen
 ln -s $CONDA_PREFIX/Library/include/eigen3/Eigen $CONDA_PREFIX/Library/include/Eigen
-# symlink eigen3/Eigen to Eigen (Linux/MacOS only)
+# Linux/MacOS only: symlink eigen3/Eigen to Eigen
 ln -s $CONDA_PREFIX/include/eigen3/Eigen $CONDA_PREFIX/include/Eigen
 pip install psdr/.
 python -m unittest test.py               
@@ -127,8 +127,8 @@ For a cmake project that uses PSDR see the `example/cpp` folder.
 If you use this library in your work, please consider citing the above papers and this repository:
 ```bibtex
 @misc{sulzer2023psdr,
-  author = {Sulzer, Raphael},
-  title = {PSDR: Planar shape detection and refinement},
+  author = {Sulzer, Raphael and Yu, Mulin and Lafarge, Florent},
+  title = {pyPSDR: Planar shape detection from point clouds},
   year = {2023},
   howpublished = {GitHub Repository},
   url = {https://github.com/raphaelsulzer/psdr}
