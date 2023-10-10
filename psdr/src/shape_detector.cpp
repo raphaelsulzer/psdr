@@ -89,9 +89,15 @@ int Shape_Detector::load_points(const std::string _filename)
     path_point_cloud = _filename;
     path_point_cloud_extension = boost::filesystem::extension(path_point_cloud);
 
+    if(!boost::filesystem::exists(path_point_cloud)){
+        _logger->error("File {} does not exist",path_point_cloud);
+        return 1;
+    }
+
     _logger->info("Load points from {}", _filename);
 
 	points.clear();
+    point_classes.clear();
 
     try{
         if (path_point_cloud_extension == ".ply")
@@ -110,7 +116,8 @@ int Shape_Detector::load_points(const std::string _filename)
         _logger->error(e.what());
         return 1;
     }
-	
+
+    _logger->debug("Loaded {} points",points.size());
 	inliers_to_natural_colors = std::vector<CGAL::Color>(points.size(), CGAL::black());
 	spacing_is_known = false;
 	set_extrema();
@@ -131,23 +138,26 @@ bool Shape_Detector::load_ply()
 
 
 	if (s == "format ascii 1.0") {
-		std::ifstream stream(path_point_cloud);
-//        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
-        if (!stream || !CGAL::read_ply_points(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+        std::ifstream stream(path_point_cloud);
+//        if (!stream || !CGAL::IO::read_PLY_with_properties(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+        if (!stream || !CGAL::IO::read_PLY_with_properties(stream, std::back_inserter(points),
+                                                           CGAL::IO::make_ply_point_reader(Point_map()),
+                                                           CGAL::IO::make_ply_normal_reader(Normal_map()))) {
             return 1;
 		}
 	}
 	else {
 		std::ifstream stream(path_point_cloud, std::ios_base::binary);
-//        if (!stream || !CGAL::IO::read_PLY(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
-        if (!stream || !CGAL::read_ply_points(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
+        if (!stream || !CGAL::IO::read_PLY_with_properties(stream, std::back_inserter(points),
+                                                           CGAL::IO::make_ply_point_reader(Point_map()),
+                                                           CGAL::IO::make_ply_normal_reader(Normal_map()))) {
             return 1;
 		}
 	}
 	if (points[0].second == Inexact_Vector_3(0, 0, 0)) {
-        _logger->warn("input .ply file does not contain valid 'normals'. 'normals' will be estimated.");
+        _logger->warn("Input .ply file does not contain valid normals. normals will be estimated.");
 
-        _logger->debug("estimate global k neighbor scale");
+        _logger->debug("Estimate global k neighbor scale");
         // first estimate k for knn
         vector<Inexact_Point_3> tpoints;
         for(const auto pnv : points)
@@ -436,6 +446,14 @@ bool Shape_Detector::load_npz()
         p = Inexact_Point_3(pts(i,0),pts(i,1),pts(i,2));
         n = Inexact_Vector_3(normals(i,0),normals(i,1),normals(i,2));
         points[i] = std::make_pair(p, n);
+    }
+
+    if(a.find("classes") != a.end()){
+        auto pcls = a["classes"].cast<int>();
+        for(int i = 0; pcls.shape()[0]; i++){
+            point_classes.push_back(pcls(i));
+        }
+        assert(points.size() == point_classes.size());
     }
 
 
@@ -8106,7 +8124,6 @@ void Shape_Detector::detect_planes()
 	// Performs a region-growing algorithm.
 
 	// Initializes structures
-
 	planes_0.clear();
 	planes_1.clear();
 	planes_2.clear();
@@ -8114,8 +8131,7 @@ void Shape_Detector::detect_planes()
 	planes_centroids.clear();
 	planes_to_colors.clear();
 
-
-    if (path_point_cloud_extension == ".ply") {
+    if(path_point_cloud_extension == ".ply"){
         planes_to_inliers.clear();
         inliers_to_planes = std::vector<int>(points.size(), -1);
         do_region_growing();
@@ -8130,7 +8146,7 @@ void Shape_Detector::detect_planes()
 	std::default_random_engine generator;
     std::uniform_int_distribution<int> uniform_distribution(100, 255);
 
-	for (size_t i = 0; i < planes_to_inliers.size(); ++i) {
+    for(size_t i = 0; i < planes_to_inliers.size(); ++i){
 
 		//Inexact_Point_3 centroid = CGAL::ORIGIN;
 		double xc = 0, yc = 0, zc = 0;
@@ -9042,6 +9058,10 @@ void Shape_Detector::to_npz(const string& filename)
     auto xnormals = xt::adapt(normals, shape);
     xt::dump_npz(filename,"normals",xnormals,compress,append);
 
+    shape = {point_classes.size()};
+    auto xclasses = xt::adapt(point_classes, shape);
+    xt::dump_npz(filename,"classes",xclasses,compress,append);
+
     shape = { planes_2.size(), 4 };
     auto xgroup_parameters = xt::adapt(group_parameters, shape);
     xt::dump_npz(filename,"group_parameters",xgroup_parameters,compress,append);
@@ -9050,13 +9070,15 @@ void Shape_Detector::to_npz(const string& filename)
     auto xgroup_colors = xt::adapt(group_colors, shape);
     xt::dump_npz(filename,"group_colors",xgroup_colors,compress,append);
 
-    shape = { planes_2.size(), 1 };
+    shape = { planes_2.size()};
     auto xgroup_num_points = xt::adapt(group_num_points, shape);
     xt::dump_npz(filename,"group_num_points",xgroup_num_points,compress,append);
 
-    shape = { group_points.size(), 1 };
+    shape = { group_points.size()};
     auto xgroup_points = xt::adapt(group_points, shape);
     xt::dump_npz(filename,"group_points",xgroup_points,compress,append);
+
+
 
 }
 

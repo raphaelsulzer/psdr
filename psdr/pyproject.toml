@@ -20,7 +20,7 @@ Homepage = "https://github.com/raphaelsulzer/psdr"
 # Protect the configuration against future changes in scikit-build-core
 minimum-version = "0.4"
 # Setuptools-style build caching in a local directory
-build-dir = "build/scikit"
+build-dir = "build/{wheel_tag}"
 # Build stable ABI wheels for CPython 3.12+
 wheel.py-api = "cp312"
 

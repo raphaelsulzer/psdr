@@ -100,15 +100,13 @@ public:
 
     int load_points(const string _filename);
 
+    void set_extrema();
+
 protected:
 	bool load_ply();
 
 	bool load_vg();
     bool load_npz();
-
-
-protected:
-	void set_extrema();
 
 public:
 
@@ -325,6 +323,8 @@ public:
     string path_point_cloud_extension;
     string path_clusters;
 	Pwn_vector points;
+    vector<int> point_classes;
+    bool spacing_is_known;
 
 protected:
     vector<vector<int> > spherical_neighborhood;
@@ -334,7 +334,6 @@ protected:
 	double x_min, x_max, y_min, y_max, z_min, z_max;
 	double bbox_diagonal;
 	double average_spacing;
-	bool spacing_is_known;
 	int min_points;
 	double epsilon;
 	int knn;
@@ -472,40 +471,20 @@ public:
     vector<pair<double, double>> planes_to_unit_sphere_degree;//gauss sphere degree for each plane
     vector<double> planes_to_inliernumber;//inlier number ratio of each plane
     vector<int> planes_to_parallel_clusters;//plane's parallel cluster index
-
     vector <vector<int>> parallel_clusters_to_planes;//index of planes for each parallel cluester, exist single cluster
-
-
-
-
-
-
     vector<Inexact_Vector_3> normal_parallel_clusters;//normals for parallel clusters
-	
-	
-
-
-
-
-
-
-	
-    vector<vector<pair<int, Inexact_Vector_3>>> parallel_id_changed_normal_after_orthogonal;//id of parallel cluster and regularized normal
+        vector<vector<pair<int, Inexact_Vector_3>>> parallel_id_changed_normal_after_orthogonal;//id of parallel cluster and regularized normal
     vector<Inexact_Point_3> planes_centroids_coplanar;
     vector<vector<vector<int>>> parallel_cluster_to_coplanr_cases;
     vector<vector<double>> energy_changing_initial_regularization;
     vector<bool> if_regularization_can_conducted;
     vector<bool> planes_if_regularized;
-
     vector<int> planes_to_parallel_done;
     vector<int> planes_to_orthogonal_done;
     vector<int> planes_to_coplanar_done;
     vector<vector<int>> parallel_done_to_planes;
     vector<vector<int>> orthogonal_done_to_planes;
     vector<vector<int>> coplanar_done_to_planes;
-
-
-
 
 };
 

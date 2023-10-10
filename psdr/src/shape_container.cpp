@@ -19,14 +19,14 @@ Shape_Container::Shape_Container(Shape_Detector* _SD)
 int Shape_Container::detect()
 {
 
-    if(SD->path_point_cloud_extension != ".vg"){
-        SD->_logger->info("Detect planes...");
-        SD->_logger->info("epsilon = {}, min_inliers = {}, normal_threshold = {}, knn = {}",
-                           SD->get_epsilon(),SD->get_min_points(),SD->get_normal_threshold(),SD->get_knn());
-    }
-    else{
-        SD->_logger->info("Load planar shapes from .vg file...");
-    }
+//    if(SD->path_point_cloud_extension != ".vg"){
+    SD->_logger->info("Detect planes...");
+    SD->_logger->info("epsilon = {}, min_inliers = {}, normal_threshold = {}, knn = {}",
+                       SD->get_epsilon(),SD->get_min_points(),SD->get_normal_threshold(),SD->get_knn());
+//    }
+//    else{
+//        SD->_logger->info("Load planar shapes from .vg file...");
+//    }
 
 
 	SD->detect_shapes();
@@ -272,6 +272,10 @@ void Shape_Container::to_ply(const string & filename, const string &  type)
     points.reserve(total_convex_hulls);
     colors.reserve(total_convex_hulls);
 
+//    map<int,CGAL::Color> class_colors;
+//    if(SD->point_classes.size()){
+//    }
+
     for (size_t p = 0; p < total_convex_hulls; ++p) {
         if (is_primitive_degenerate(p)) continue;
 
@@ -305,9 +309,6 @@ void Shape_Container::to_ply(const string & filename, const string &  type)
         }
     }
 
-    auto pp = fs::path(filename).parent_path();
-    if(!fs::is_directory(pp))
-        fs::create_directories(pp);
     std::ofstream stream(filename, std::ios::out);
     if (!stream.is_open()){
         throw std::ios_base::failure("Error : cannot write into an output file");
@@ -369,9 +370,13 @@ void Shape_Container::to_ply(const string & filename, const string &  type)
 
 int Shape_Container::save(const string& filename, const string& type){
 
-    string extension = boost::filesystem::extension(filename);
+    string extension = fs::path(filename).extension().string();
 
     SD->_logger->info("Save planar shapes to {}", filename);
+
+    auto pp = fs::path(filename).parent_path();
+    if(!fs::is_directory(pp))
+        fs::create_directories(pp);
 
     try{
         if (extension == ".ply")

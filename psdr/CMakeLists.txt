@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14.0)
-project(planar_shape_detection_and_refinement LANGUAGES CXX)
+project(Planar_Shape_Detection LANGUAGES CXX)
 
 ######################################################
 ###################### SETTINGS ######################

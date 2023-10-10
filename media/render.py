@@ -252,6 +252,10 @@ class BlenderRender:
             # remove color from wireframe
             col=obj.data.color_attributes.get('Col')
             obj.data.color_attributes.remove(col)
+
+        if len(color) == 3:
+            color+=[1]
+
         # add new black color
         colattr = obj.data.color_attributes.new(
             name='Col',
