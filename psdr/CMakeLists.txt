@@ -9,6 +9,10 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+if(MSVC)
+        add_compile_definitions(_HAS_STD_BYTE=0)
+endif(MSVC)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
