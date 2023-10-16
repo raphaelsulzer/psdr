@@ -143,23 +143,24 @@ int pyPSDR::load_points(const array3& points){
 
 int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_normal_threshold = 0.85, int knn = 10){
 
-    _SD.set_detection_parameters(rg_min_points, rg_epsilon, knn, rg_normal_threshold);
 
-    _SD.set_regularization_parameters(0.8, 5, rg_epsilon/2.0);
-    _SD.set_discretization_parameters(0.5, 0.4);
+
     _SD.set_constraint(false);
     _SD.set_weight_m(0);
     _SD.set_metric_type(0);
-    _SD.set_lambda_fidelity(1.0);
     _SD.set_lambda_c(1.0);
     _SD.set_lambda_r(1.0);
     _SD.set_lambda_regularity(1.0);
+    _SD.set_lambda_fidelity(1.0);
+    _SD.set_detection_parameters(rg_min_points, rg_epsilon, knn, rg_normal_threshold);
+    _SD.set_regularization_parameters(0.8, 5, rg_epsilon/2.0);
+    _SD.set_discretization_parameters(0.5, rg_epsilon/2.0);
 
     return _SC.detect();
 }
 
-int pyPSDR::refine(int max_iter = -1){
-    return _SC.refine(max_iter);
+int pyPSDR::refine(int max_iterations = -1, int max_seconds = -1){
+    return _SC.refine(max_iterations, max_seconds);
 }
 
 int pyPSDR::save(const string filename, const string type = "convex"){
@@ -167,7 +168,7 @@ int pyPSDR::save(const string filename, const string type = "convex"){
 }
 
 
-NB_MODULE(pypsdr_ext, m) {
+NB_MODULE(pypsdr_ext, m){
     nb::class_<pyPSDR>(m, "psdr")
             .def(nb::init<int>(),"verbosity"_a = 0)
             .def("load_points", nb::overload_cast<const string>(&pyPSDR::load_points), "file"_a ,"Load a point cloud with normals or a point group file.")
@@ -175,7 +176,7 @@ NB_MODULE(pypsdr_ext, m) {
             .def("load_points", nb::overload_cast<const array3&, const array3&>(&pyPSDR::load_points), "points"_a, "normals"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&>(&pyPSDR::load_points), "points"_a ,"Load points from a numpy array.")
             .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10, "Detect planar shapes.")
-            .def("refine", &pyPSDR::refine, "max_iter"_a = -1, "Refine planar shapes.")
+            .def("refine", &pyPSDR::refine, "max_iterations"_a = -1, "max_seconds"_a = -1, "Refine planar shapes.")
             .def("save", &pyPSDR::save, "file"_a, "primitive_type"_a = "convex", "Save planar shapes to file.");
 }
 

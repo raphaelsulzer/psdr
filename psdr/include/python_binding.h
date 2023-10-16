@@ -33,7 +33,7 @@ public:
     int load_points(const array3& points);
 
     int detect(int rg_min_points, double rg_epsilon, double rg_normal_threshold, int knn);
-    int refine(int max_iter);
+    int refine(int max_iterations, int max_seconds);
     int save(const string filename, const string type);
 };
 

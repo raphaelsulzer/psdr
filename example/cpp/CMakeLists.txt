@@ -30,7 +30,6 @@ find_package(xtensor-io REQUIRED)
 
 include_directories(../../psdr/include)
 # make sure to include psdr build which was generated with the same environment
-link_directories(../../psdr/build/scikit)
 #link_directories(../../psdr/build/release)
 
 ##############################
@@ -39,9 +38,20 @@ link_directories(../../psdr/build/scikit)
 add_executable(example
     "example.cpp")
 
+add_library(ShapeDetectionDebug STATIC IMPORTED) # or STATIC instead of SHARED
+set_target_properties(ShapeDetectionDebug PROPERTIES
+  IMPORTED_LOCATION "/home/rsulzer/cpp/psdr/psdr/build/debug/libShapeDetection.a"
+  INTERFACE_INCLUDE_DIRECTORIES "/home/rsulzer/cpp/psdr/psdr/include"
+)
+add_library(ShapeDetectionRelease STATIC IMPORTED) # or STATIC instead of SHARED
+set_target_properties(ShapeDetectionRelease PROPERTIES
+  IMPORTED_LOCATION "/home/rsulzer/cpp/psdr/psdr/build/release/libShapeDetection.a"
+  INTERFACE_INCLUDE_DIRECTORIES "/home/rsulzer/cpp/psdr/psdr/include"
+)
+
+target_link_libraries(example debug ShapeDetectionDebug optimized ShapeDetectionRelease)
 target_link_libraries(example ${Boost_LIBRARIES})
 target_link_libraries(example ${CGAL_LIBRARIES})
 target_link_libraries(example spdlog::spdlog)
 target_link_libraries(example ZLIB::ZLIB xtensor xtensor-io)
-target_link_libraries(example ShapeDetection)
 

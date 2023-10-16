@@ -14,7 +14,7 @@ public:
 
 	void regularize();
 
-    int refine(int max_iter = -1);
+    int refine(int max_iter = -1, int max_seconds = -1);
 	void copy_primitives_from_detector();
 	
 	void copy_support_planes_from_detector();

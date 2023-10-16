@@ -132,7 +132,7 @@ public:
 
 //	void regularize_shapes();
 
-    void refine_shapes(int mi);
+    void refine_shapes(int max_iter, int max_seconds);
 
 	void planar_shape_detection_L1();
 	void get_last_information();
@@ -241,6 +241,7 @@ public:
     void set_metric_type(int m);
 
     void set_max_iter(int mi);
+    void set_max_seconds(int ms);
 
 	int get_number_of_non_coplanar_planes();
 
@@ -409,7 +410,8 @@ public:
 	double lambda_fidelity;
 
     int metric_type;
-    int max_iter;
+    int _max_iter;
+    int _max_seconds;
 
 	double mean_error;
 	double all_error;

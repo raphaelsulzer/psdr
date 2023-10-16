@@ -56,10 +56,10 @@ int Shape_Container::detect()
 //	discard_degenerate_primitives();
 //}
 
-int Shape_Container::refine(int max_iter) {
+int Shape_Container::refine(int max_iter, int max_seconds) {
 
     SD->_logger->info("Refine planes...");
-    SD->refine_shapes(max_iter);
+    SD->refine_shapes(max_iter, max_seconds);
 	SD->set_primitives();
 	copy_primitives_from_detector();
 	copy_support_planes_from_detector();

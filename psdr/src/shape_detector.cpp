@@ -47,7 +47,6 @@ Shape_Detector::Shape_Detector()
 
     knn = -1;
     should_compute_knn = true;
-    if_stop = false;
 
     if_constraint = false;
 
@@ -716,7 +715,8 @@ void Shape_Detector::set_regularization_parameters(
 void Shape_Detector::set_discretization_parameters(double _discretization_angle, double _discretization_distance_ratio)
 {
 	discretization_angle = _discretization_angle;
-	discretization_distance = _discretization_distance_ratio * bbox_diagonal / 100.0;
+//    discretization_distance = _discretization_distance_ratio * bbox_diagonal / 100.0;
+    discretization_distance = _discretization_distance_ratio;
 
     _logger->debug( "discretization_angle = {}", discretization_angle);
     _logger->debug( "discretization_dist  = {}", discretization_distance);
@@ -756,12 +756,13 @@ void Shape_Detector::detect_shapes()
 //}
 
 
-void Shape_Detector::refine_shapes(int mi) {
+void Shape_Detector::refine_shapes(int max_iter, int max_seconds) {
 
     if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
 
 
-    set_max_iter(mi);
+    set_max_iter(max_iter);
+    set_max_seconds(max_seconds);
 
 	initial_regular_groups_done();
 	clock_t t_start = clock();
@@ -780,19 +781,18 @@ void Shape_Detector::refine_shapes(int mi) {
 	
 	show_result(t_all);
 
-	if_stop = false;
 
-	//update color
-	planes_to_colors.clear();
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> uniform_distribution(100, 225);
-	for (size_t i = 0; i < planes_2.size(); ++i) {
-		unsigned char r = 0, g = 0, b = 0;
+    //update color
+    planes_to_colors.clear();
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> uniform_distribution(100, 225);
+    for (size_t i = 0; i < planes_2.size(); ++i) {
+        unsigned char r = 0, g = 0, b = 0;
         r = uniform_distribution(generator);
         g = uniform_distribution(generator);
         b = uniform_distribution(generator);
-		planes_to_colors.push_back(CGAL::Color(r, g, b));
-	}
+        planes_to_colors.push_back(CGAL::Color(r, g, b));
+    }
 }
 
 void Shape_Detector::show_result(double t) {
@@ -2304,6 +2304,7 @@ void Shape_Detector::planar_shape_detection_l2() {
 
 	//In each loop, first: global transder, then local operations.
     number_iterations=0;
+    int number_seconds=0;
 	do {
 		timett++;
 		propagation2 = true;
@@ -2365,12 +2366,18 @@ void Shape_Detector::planar_shape_detection_l2() {
 		get_distance_diviation_show_merge_info(local_time);
 
 		number_iterations++;
-
-        if ((t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
-                || timett > 800 || (timett > 500 && t_split == t_merge) || if_stop
-                || (max_iter>0 && number_iterations > max_iter))
+        clock_t t_end_one_it = clock();
+        number_seconds = int(t_end_one_it - t_start_all) / CLOCKS_PER_SEC;
+        if (    // original conditions
+                (t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
+                || timett > 800 || (timett > 500 && t_split == t_merge)
+                // my max iteration
+                || (_max_iter>0 && number_iterations > _max_iter)
+                // my max time
+                || (_max_seconds>0 && number_seconds > _max_seconds)
+                )
             propagation2 = false;
-	} while (propagation2);
+    }while (propagation2);
 
 	orthogonal_numbers = 0;
 	parallel_numbers = 0;
@@ -2378,7 +2385,7 @@ void Shape_Detector::planar_shape_detection_l2() {
 
 	get_distance_diviation();
 	clock_t t_end_all = clock();
-	interval_all = double(t_end_all - t_start_all) / CLOCKS_PER_SEC;
+    interval_all = double(t_end_all - t_start_all) / CLOCKS_PER_SEC;
 
 	get_coverage_and_mean_error_pure();
 	planes_1 = planes_2;
@@ -2388,7 +2395,7 @@ void Shape_Detector::planar_shape_detection_l2() {
 }
 
 //L1.1.
-void Shape_Detector::planar_shape_detection_L1() {
+void Shape_Detector::planar_shape_detection_L1(){
 
 	int timett = 0;
 	bool propagation2;
@@ -2412,6 +2419,7 @@ void Shape_Detector::planar_shape_detection_L1() {
 	all_regularization = 0;
 	clock_t t_start_all = clock();
     number_iterations=0;
+    int number_seconds=0;
 	do {
 		timett++;
 
@@ -2428,7 +2436,7 @@ void Shape_Detector::planar_shape_detection_L1() {
 
 
 		clock_t t_end = clock();
-		double trsfer_time = double(t_end - t_start) / CLOCKS_PER_SEC;
+        double trsfer_time = double(t_end - t_start) / CLOCKS_PER_SEC;
 
 		
 		get_distance_diviation_show_normal_info(trsfer_time);
@@ -2471,10 +2479,16 @@ void Shape_Detector::planar_shape_detection_L1() {
 		get_distance_diviation_show_merge_info(local_time);
 
 		number_iterations++;
-
-        if ((t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
-                || timett > 800 || (timett > 500 && t_split == t_merge) || if_stop
-                || (max_iter>0 && number_iterations > max_iter))
+        clock_t t_end_one_it = clock();
+        number_seconds = int(t_end_one_it - t_start_all) / CLOCKS_PER_SEC;
+        if (    // original conditions
+                (t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
+                || timett > 800 || (timett > 500 && t_split == t_merge)
+                // my max iteration
+                || (_max_iter>0 && number_iterations > _max_iter)
+                // my max time
+                || (_max_seconds>0 && number_seconds > _max_seconds)
+                )
             propagation2 = false;
 	} while (propagation2);
 
@@ -2519,6 +2533,7 @@ void Shape_Detector::planar_shape_detection_hybrid() {
 	all_regularization = 0;
 	clock_t t_start_all = clock();
     number_iterations=0;
+    int number_seconds=0;
     do{
 		timett++;
 		propagation2 = true;
@@ -2569,9 +2584,17 @@ void Shape_Detector::planar_shape_detection_hybrid() {
 		
 		number_iterations++;
 
-        if ((t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
-                || timett > 800 || (timett > 500 && t_split == t_merge) || if_stop
-                || (max_iter>0 && number_iterations > max_iter))
+        clock_t t_end_one_it = clock();
+        number_seconds = int(t_end_one_it - t_start_all) / CLOCKS_PER_SEC;
+
+        if (    // original conditions
+                (t_m == 0 && timett > 1)||(t_m==t_regularization&&timett>10)
+                || timett > 800 || (timett > 500 && t_split == t_merge)
+                // my max iteration
+                || (_max_iter>0 && number_iterations > _max_iter)
+                // my max time
+                || (_max_seconds>0 && number_seconds > _max_seconds)
+                )
             propagation2 = false;
     }while (propagation2);
 
@@ -8206,27 +8229,6 @@ bool Shape_Detector::inliers_arent_aligned(const std::vector<int> & inds)
 	return false;
 }
 
-
-//void Shape_Detector::regularize_planes()
-//{
-//	clock_t t_regularize_start = clock();
-//	planes_1 = planes_0;
-
-//    CGAL::Shape_regularization::Planes::regularize_planes(points,
-//			Point_map(),
-//			planes_1,
-//			CGAL::Identity_property_map<Inexact_Plane>(),
-//			Shape_Detector_Index_Map(inliers_to_planes),
-//			true, true, true, false,
-//			tolerance_angle,
-//			tolerance_coplanarity,
-//			Inexact_Vector_3(0, 0, 1));
-
-//	clock_t t_regularize_end = clock();
-//    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
-//}
-
-
 void Shape_Detector::get_coverage_and_mean_error()
 {
 	number_of_assigned_points = 0;
@@ -8601,24 +8603,6 @@ void Shape_Detector::set_primitives()
     _logger->debug( "Compute primitives (alpha shape, best rectangle and convex hull) : {} s." ,double(t_end - t_start) / CLOCKS_PER_SEC );
 }
 
-//void Shape_Detector::set_default_parameters(){
-
-//    set_discretization_parameters(0.5, 0.4);
-//    set_constraint(false);
-//    set_weight_m(0);
-//    set_metric_type(0);
-//    set_max_iter(-1);
-
-//    set_lambda_fidelity(1.0);
-//    set_lambda_c(1.0);
-//    set_lambda_r(1.0);
-//    set_lambda_regularity(1.0);
-//}
-
-void Shape_Detector::set_stop_iteration(bool cc) {
-	if_stop = cc;
-}
-
 void Shape_Detector::set_constraint(bool cc) {
 	if_constraint = cc;
 }
@@ -8650,7 +8634,10 @@ void Shape_Detector::set_weight_m(int wm) {
 	weight_mode = wm;
 }
 void Shape_Detector::set_max_iter(int mi) {
-    max_iter = mi;
+    _max_iter = mi;
+}
+void Shape_Detector::set_max_seconds(int ms) {
+    _max_seconds = ms;
 }
 
 void Shape_Detector::set_metric_type(int m) {
