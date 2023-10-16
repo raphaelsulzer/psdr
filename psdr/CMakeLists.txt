@@ -10,7 +10,8 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(MSVC)
-        add_compile_definitions(_HAS_STD_BYTE=0)
+    # https://studiofreya.com/2018/01/06/visual-studio-2017-with-cpp17-and-boost/#stdbyte-ambiguous-symbol-and-rpcndr.h
+    add_compile_definitions(_HAS_STD_BYTE=0)
 endif(MSVC)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

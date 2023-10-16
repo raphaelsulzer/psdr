@@ -62,7 +62,7 @@ int pyPSDR::load_points(const array3& points, const array3& normals, const array
         _SD.point_classes.push_back(classes(i));
     }
 
-    _SD._logger->debug("Loaded {} points",points.size());
+    _SD._logger->debug("Loaded {} points",points.shape(0));
 
     _SD.if_oriented_normal = true;
 
@@ -96,7 +96,7 @@ int pyPSDR::load_points(const array3& points, const array3& normals){
         _SD.points.push_back(pwn);
     }
 
-    _SD._logger->debug("Loaded {} points",points.size());
+    _SD._logger->debug("Loaded {} points",points.shape(0));
 
     _SD.if_oriented_normal = true;
 
