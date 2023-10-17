@@ -49,23 +49,16 @@ int main(int argc, char const *argv[]){
 
 
 
-    double pd_epsilon = 0.008*SD.get_bbox_diagonal();
+    double pd_epsilon = 0.02*SD.get_bbox_diagonal();
     int min_inliers = 50;
     double normal_th = 0.85;
     int knn = 10;
 
     logger->info("Detect planes with epsilon {}, min inliers {} and normal threshold {}",pd_epsilon,min_inliers,normal_th);
 
-    SD.set_constraint(false);
-    SD.set_weight_m(0);
-    SD.set_metric_type(0);
-    SD.set_lambda_c(1.0);
-    SD.set_lambda_r(1.0);
-    SD.set_lambda_regularity(1.0);
-    SD.set_lambda_fidelity(1.0);
+
     SD.set_detection_parameters(min_inliers, pd_epsilon, knn, normal_th);
-    SD.set_regularization_parameters(0.8, 5, pd_epsilon/2.0);
-    SD.set_discretization_parameters(0.5, pd_epsilon/2.0);
+
 
     auto SC = Shape_Container(&SD);
     if(SC.detect()){
@@ -79,8 +72,20 @@ int main(int argc, char const *argv[]){
     plane_file = "/home/rsulzer/cpp/psdr/example/data/anchor/convexes_detected/file.npz";
     SC.save(plane_file);
 
+    // refinement params
+    SD.set_constraint(false);
+    SD.set_weight_m(0);
+    SD.set_metric_type(0);
+    SD.set_lambda_c(1.0);
+    SD.set_lambda_r(1.0);
+    SD.set_lambda_regularity(1.0);
+    SD.set_lambda_fidelity(1.0);
 
-    if(SC.refine()){
+    SD.set_regularization_parameters(5.0, pd_epsilon/2.0); // not called anywhere
+
+    SD.set_discretization_parameters(0.5, pd_epsilon/2.0);
+
+    if(SC.refine(2)){
         logger->error("Could not refine planes!");
         return 1;
     }

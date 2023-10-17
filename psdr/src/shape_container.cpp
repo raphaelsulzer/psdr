@@ -18,43 +18,39 @@ Shape_Container::Shape_Container(Shape_Detector* _SD)
 
 int Shape_Container::detect()
 {
-
-//    if(SD->path_point_cloud_extension != ".vg"){
     SD->_logger->info("Detect planes...");
     SD->_logger->info("epsilon = {}, min_inliers = {}, normal_threshold = {}, knn = {}",
                        SD->get_epsilon(),SD->get_min_points(),SD->get_normal_threshold(),SD->get_knn());
-//    }
-//    else{
-//        SD->_logger->info("Load planar shapes from .vg file...");
-//    }
 
-
-	SD->detect_shapes();
+    SD->detect_shapes();
 	SD->set_primitives();
 
-	copy_primitives_from_detector();
+    copy_primitives_from_detector();
 	copy_support_planes_from_detector();
 	SD->clear_primitives();
 
 	discard_degenerate_primitives();
 
-    SD->_logger->info("detected {} planes",SD->get_number_of_non_coplanar_planes());
+    if(SD->_should_discretize)
+        SD->_logger->info("detected {} non-coplanar planes (discretized)",SD->get_number_of_non_coplanar_planes());
+    else
+        SD->_logger->info("detected {} planes",SD->planes_2.size());
 
     return 0;
 
 }
 
-//void Shape_Container::regularize()
-//{
-//	SD->regularize_shapes();
-//	SD->set_primitives();
+void Shape_Container::regularize()
+{
+    SD->regularize_shapes();
+    SD->set_primitives();
 
-//	copy_primitives_from_detector();
-//	copy_support_planes_from_detector();
-//	SD->clear_primitives();
+    copy_primitives_from_detector();
+    copy_support_planes_from_detector();
+    SD->clear_primitives();
 
-//	discard_degenerate_primitives();
-//}
+    discard_degenerate_primitives();
+}
 
 int Shape_Container::refine(int max_iter, int max_seconds) {
 
@@ -67,7 +63,10 @@ int Shape_Container::refine(int max_iter, int max_seconds) {
 
 	discard_degenerate_primitives();
 
-    SD->_logger->info("refined to {} planes",SD->planes_2.size());
+    if(SD->_should_discretize)
+        SD->_logger->info("refined to {} non-coplanar planes (discretized)",SD->get_number_of_non_coplanar_planes());
+    else
+        SD->_logger->info("refined to {} planes",SD->planes_2.size());
 
     return 0;
 }

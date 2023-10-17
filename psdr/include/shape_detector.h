@@ -117,7 +117,6 @@ public:
             double _normal_threshold);
 
     void set_regularization_parameters(
-		double _lambda,
 		double _tolerance_angle,
 		double _tolerance_coplanarity);
 
@@ -130,7 +129,7 @@ public:
 
 	void load_shapes();
 
-//	void regularize_shapes();
+    void regularize_shapes();
 
     void refine_shapes(int max_iter, int max_seconds);
 
@@ -157,7 +156,7 @@ public:
 protected:
     void detect_planes();
 
-//	void regularize_planes();
+    void regularize_planes();
 
 	void discretize_planes();
 
@@ -327,11 +326,13 @@ public:
     vector<int> point_classes;
     bool spacing_is_known;
 
+    bool _should_discretize = false;
+    bool _should_regularize = false;
+
 protected:
     vector<vector<int> > spherical_neighborhood;
     vector<Inexact_Point_3> planes_centroids;
 
-protected:
 	double x_min, x_max, y_min, y_max, z_min, z_max;
 	double bbox_diagonal;
 	double average_spacing;
@@ -341,6 +342,7 @@ protected:
 	bool should_compute_knn;
 	double normal_threshold;
 
+//    bool _should_discretize = false;
 	double discretization_angle;
 	double discretization_distance;
 
@@ -349,6 +351,7 @@ protected:
 	bool should_compute_neighborhood;
     vector<std::set<int> > neighbors;
 
+//    bool _should_regularize = false;
 	double lambda;
 	double tolerance_angle;
 	double tolerance_coplanarity;

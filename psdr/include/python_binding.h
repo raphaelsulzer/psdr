@@ -32,8 +32,8 @@ public:
     int load_points(const array3& points, const array3& normals);
     int load_points(const array3& points);
 
-    int detect(int rg_min_points, double rg_epsilon, double rg_normal_threshold, int knn);
-    int refine(int max_iterations, int max_seconds);
+    int detect(int rg_min_points, double rg_epsilon, double rg_normal_threshold, int knn, bool regularize, bool discretize);
+    int refine(int max_iterations, int max_seconds, bool regularize, bool discretize);
     int save(const string filename, const string type);
 };
 

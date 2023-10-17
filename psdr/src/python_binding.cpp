@@ -141,9 +141,23 @@ int pyPSDR::load_points(const array3& points){
 
 
 
-int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_normal_threshold = 0.85, int knn = 10){
+int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_normal_threshold = 0.85, int knn = 10,
+                   bool regularize = false, bool discretize = false){
 
 
+
+
+    _SD.set_detection_parameters(rg_min_points, rg_epsilon, knn, rg_normal_threshold);
+    if(regularize)
+        _SD.set_regularization_parameters(5, rg_epsilon/2.0); // not called anywhere
+    if(discretize)
+        _SD.set_discretization_parameters(0.5, rg_epsilon/2.0);
+
+    return _SC.detect();
+}
+
+int pyPSDR::refine(int max_iterations = -1, int max_seconds = -1,
+                   bool regularize = false, bool discretize = false){
 
     _SD.set_constraint(false);
     _SD.set_weight_m(0);
@@ -152,14 +166,12 @@ int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_no
     _SD.set_lambda_r(1.0);
     _SD.set_lambda_regularity(1.0);
     _SD.set_lambda_fidelity(1.0);
-    _SD.set_detection_parameters(rg_min_points, rg_epsilon, knn, rg_normal_threshold);
-    _SD.set_regularization_parameters(0.8, 5, rg_epsilon/2.0);
-    _SD.set_discretization_parameters(0.5, rg_epsilon/2.0);
+    double epsilon = _SD.get_epsilon();
+    if(regularize)
+        _SD.set_regularization_parameters(5, epsilon/2.0); // not called anywhere
+    if(discretize)
+        _SD.set_discretization_parameters(0.5, epsilon/2.0);
 
-    return _SC.detect();
-}
-
-int pyPSDR::refine(int max_iterations = -1, int max_seconds = -1){
     return _SC.refine(max_iterations, max_seconds);
 }
 
@@ -175,8 +187,10 @@ NB_MODULE(pypsdr_ext, m){
             .def("load_points", nb::overload_cast<const array3&, const array3&, const array1&>(&pyPSDR::load_points), "points"_a, "normals"_a, "classes"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&, const array3&>(&pyPSDR::load_points), "points"_a, "normals"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&>(&pyPSDR::load_points), "points"_a ,"Load points from a numpy array.")
-            .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10, "Detect planar shapes.")
-            .def("refine", &pyPSDR::refine, "max_iterations"_a = -1, "max_seconds"_a = -1, "Refine planar shapes.")
+            .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10, "regularization"_a = false, "discretization"_a = false,
+                 "Detect planar shapes.")
+            .def("refine", &pyPSDR::refine, "max_iterations"_a = -1, "max_seconds"_a = -1, "regularize"_a = false, "discretize"_a = false,
+                 "Refine planar shapes.")
             .def("save", &pyPSDR::save, "file"_a, "primitive_type"_a = "convex", "Save planar shapes to file.");
 }
 

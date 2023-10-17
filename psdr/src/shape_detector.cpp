@@ -5,6 +5,7 @@
 #include <CGAL/compute_average_spacing.h>
 #include <CGAL/estimate_scale.h>
 #include <CGAL/jet_estimate_normals.h>
+#include <CGAL/Shape_regularization/regularize_planes.h>
 #include <CGAL/Classification/property_maps.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -37,8 +38,8 @@ Shape_Detector::Shape_Detector()
     spdlog::set_pattern("[%H:%M:%S] [%n] [%l] %v");
 
     // regularization parameters
-    lambda = 0.8;
     tolerance_angle = 0.5;
+    tolerance_coplanarity = epsilon / 2.0;
 
 
     path_point_cloud = "";
@@ -677,9 +678,6 @@ int Shape_Detector::set_detection_parameters(int _rg_min_points, double _rg_epsi
 	epsilon = _rg_epsilon;
 	normal_threshold = _rg_normal_threshold;
 
-    // for refinement
-    tolerance_coplanarity = epsilon / 0.2;
-
     return 0;
 }
 
@@ -697,17 +695,14 @@ void Shape_Detector::set_knn( int _knn)
 
 
 void Shape_Detector::set_regularization_parameters(
-	double _lambda,
 	double _tolerance_angle,
 	double _tolerance_coplanarity)
 {
-	lambda = _lambda;
+
 	tolerance_angle = _tolerance_angle;
 	tolerance_coplanarity = _tolerance_coplanarity;
 
-    _logger->debug( "lambda = {}", lambda);
-    _logger->debug( "tolerance_angle  = {}", tolerance_angle);
-    _logger->debug( "tolerance_coplanarity  = {}", tolerance_coplanarity);
+    _should_regularize = true;
 }
 
 
@@ -715,11 +710,9 @@ void Shape_Detector::set_regularization_parameters(
 void Shape_Detector::set_discretization_parameters(double _discretization_angle, double _discretization_distance_ratio)
 {
 	discretization_angle = _discretization_angle;
-//    discretization_distance = _discretization_distance_ratio * bbox_diagonal / 100.0;
     discretization_distance = _discretization_distance_ratio;
 
-    _logger->debug( "discretization_angle = {}", discretization_angle);
-    _logger->debug( "discretization_dist  = {}", discretization_distance);
+    _should_discretize = true;
 }
 
 
@@ -729,8 +722,10 @@ void Shape_Detector::detect_shapes()
     if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
 
     detect_planes();
-	
-	discretize_planes();
+    if(_should_discretize)
+        discretize_planes();
+    else
+        planes_2 = planes_0;
 	//initialized the degree of planes' freedom.
 	initial_regular_groups_done();
 
@@ -748,13 +743,36 @@ void Shape_Detector::detect_shapes()
 
 
 
-//void Shape_Detector::regularize_shapes()
-//{
-//	regularize_planes();
-//	discretize_planes();
-//	get_coverage_and_mean_error();
-//}
+void Shape_Detector::regularize_shapes()
+{
+    regularize_planes();
+    if(_should_discretize)
+        discretize_planes();
+    get_coverage_and_mean_error();
+}
 
+void Shape_Detector::regularize_planes()
+{
+
+    _logger->debug( "tolerance_angle  = {}", tolerance_angle);
+    _logger->debug( "tolerance_coplanarity  = {}", tolerance_coplanarity);
+
+    clock_t t_regularize_start = clock();
+    planes_1 = planes_0;
+
+    CGAL::Shape_regularization::Planes::regularize_planes(points,
+            Point_map(),
+            planes_1,
+            CGAL::Identity_property_map<Inexact_Plane>(),
+            Shape_Detector_Index_Map(inliers_to_planes),
+            true, true, true, false,
+            tolerance_angle,
+            tolerance_coplanarity,
+            Inexact_Vector_3(0, 0, 1));
+
+    clock_t t_regularize_end = clock();
+    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
+}
 
 void Shape_Detector::refine_shapes(int max_iter, int max_seconds) {
 
@@ -780,6 +798,9 @@ void Shape_Detector::refine_shapes(int max_iter, int max_seconds) {
 	double t_all = double(t_end - t_start) / CLOCKS_PER_SEC;
 	
 	show_result(t_all);
+
+    if(_should_discretize)
+        discretize_planes();
 
 
     //update color
@@ -2602,6 +2623,26 @@ void Shape_Detector::planar_shape_detection_hybrid() {
     orthogonal_numbers=0;
     parallel_numbers=0;
     coplanar_numbers=0;
+
+    _logger->debug("number of parallel groups: {}",parallel_done_to_planes.size());
+    for (int i = 0; i < parallel_done_to_planes.size(); ++i) {
+        parallel_numbers += parallel_done_to_planes[i].size();
+
+    }
+    _logger->debug("number of parallel planes: {}",parallel_numbers);
+    _logger->debug("number of orthogonal goupe: {}",orthogonal_done_to_planes.size());
+    for (int i = 0; i < orthogonal_done_to_planes.size(); ++i) {
+        orthogonal_numbers += orthogonal_done_to_planes[i].size();
+
+    }
+    _logger->debug("number of orthogonal planes: {}",orthogonal_numbers);
+
+    _logger->debug("number of coplanar goupe: {}",coplanar_done_to_planes.size());
+    for (int i = 0; i < coplanar_done_to_planes.size(); ++i) {
+        coplanar_numbers += coplanar_done_to_planes[i].size();
+
+    }
+    _logger->debug("number of coplanar planes: {}",coplanar_numbers);
 
     get_distance_diviation();
     clock_t t_end_all = clock();
@@ -9328,6 +9369,7 @@ void Shape_Detector::initialize_orthogonal_clusters_after_parallel() {
 }
 
 void Shape_Detector::initialize_coplanar_clusters_after_parallel() {
+
 	planes_centroids_coplanar.clear();
 	planes_centroids_coplanar = planes_centroids;
 	parallel_cluster_to_coplanr_cases.clear();
@@ -9624,14 +9666,11 @@ int Shape_Detector::get_changed_degrees_of_freedom_after_a_regular_operation(int
 					int id_copl_group = coplanar_done_to_planes_after.size();
 					coplanar_done_to_planes_after.push_back(a_co);
 					for (int id_c : a_co) {
-
 						planes_to_coplanar_done_after[id_c] = id_copl_group;
-
 					}
 				}
 			}
 		}
-
 	}
 	
 
@@ -9662,7 +9701,6 @@ int Shape_Detector::get_changed_degrees_of_freedom_after_a_regular_operation(int
 			orthogonal_done_to_planes_after[planes_to_orthogonal_done_after[i]].push_back(i);
 		}
 		if (planes_to_coplanar_done_after[i] != -1) {
-
 			coplanar_done_to_planes_after[planes_to_coplanar_done_after[i]].push_back(i);
 		}
 	}
@@ -9672,7 +9710,6 @@ int Shape_Detector::get_changed_degrees_of_freedom_after_a_regular_operation(int
 
 			parallel_done_to_planes_new.push_back(this_parallel_done);
 		}
-
 	}
 
 	if (parallel_done_to_planes_new.size() != parallel_done_to_planes_after.size()) {
@@ -9684,16 +9721,13 @@ int Shape_Detector::get_changed_degrees_of_freedom_after_a_regular_operation(int
 			for (int id_p : parallel_done_to_planes_after[i]) {
 				planes_to_parallel_done_after[id_p] = i;
 			}
-
 		}
-
 	}
 
 
 	std::vector<std::vector<int>> orthogonal_done_to_planes_new;
 	for (std::vector<int> this_orthogonal_done : orthogonal_done_to_planes_after) {
 		if (this_orthogonal_done.size() > 1) {
-
 			orthogonal_done_to_planes_new.push_back(this_orthogonal_done);
 		}
 
@@ -9716,7 +9750,6 @@ int Shape_Detector::get_changed_degrees_of_freedom_after_a_regular_operation(int
 	std::vector<std::vector<int>> coplanar_done_to_planes_new;
 	for (std::vector<int> this_coplanar_done : coplanar_done_to_planes_after) {
 		if (this_coplanar_done.size() > 1) {
-
 			coplanar_done_to_planes_new.push_back(this_coplanar_done);
 		}
 
@@ -9767,18 +9800,12 @@ void Shape_Detector::discretize_planes()
 	
 	double dist_min_threshold = discretization_distance;
 
-
-    // this line seems to be problematic, as it is only triggered when
-    // epsilon is not multiplied by the bounding box diagonal
-    // (because discretization distance is multiplied)!
-    // to solve the problem for now I will keep on multiplying epsilon with the bounding
-    // box diagonal
 	if (dist_min_threshold > epsilon / 2.0) {
-
 		dist_min_threshold = epsilon / 2.0;
-
 	}
-    _logger->debug("dist_min_threshold = {}", dist_min_threshold );
+    _logger->info( "Apply discretization with: ");
+    _logger->info( "discretization_angle = {}", discretization_angle);
+    _logger->info( "discretization_dist  = {}", dist_min_threshold);
 
 	non_coplanar_planes = 0;
 
@@ -9910,8 +9937,6 @@ void Shape_Detector::discretize_planes()
 			atlas[key].push_back(plane_index);
 		}
 	}
-
-
 }
 
 void Shape_Detector::make_3d_histogram(std::map<std::pair<int, int>, std::list<int> > & A, const double ds, std::vector<std::pair<Inexact_Vector_3, double> > & H)
