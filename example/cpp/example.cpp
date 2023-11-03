@@ -60,6 +60,8 @@ int main(int argc, char const *argv[]){
     SD.set_detection_parameters(min_inliers, pd_epsilon, knn, normal_th);
 
 
+    SD.set_discretization_parameters(0.5, pd_epsilon/2.0);
+
     auto SC = Shape_Container(&SD);
     if(SC.detect()){
         logger->error("Could not detect planes");
@@ -81,15 +83,13 @@ int main(int argc, char const *argv[]){
     SD.set_lambda_regularity(1.0);
     SD.set_lambda_fidelity(1.0);
 
-    SD.set_regularization_parameters(5.0, pd_epsilon/2.0); // not called anywhere
-
+//    SD.set_regularization_parameters(5.0, pd_epsilon/2.0); // not called anywhere
     SD.set_discretization_parameters(0.5, pd_epsilon/2.0);
 
     if(SC.refine(2)){
         logger->error("Could not refine planes!");
         return 1;
     }
-
 
     plane_file = "/home/rsulzer/cpp/psdr/example/data/anchor/convexes_refined/file.ply";
     logger->debug("save planes to {}",plane_file);

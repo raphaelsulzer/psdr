@@ -51,9 +51,9 @@ Shape_Detector::Shape_Detector()
 
     if_constraint = false;
 
-    lambda_r = 1.0;
+    lambda_complexity = 1.0;
     weight_mode = 0;
-    lambda_c = 1.0;
+    lambda_completeness = 1.0;
     lambda_fidelity = 1.0;
     lambda_regular = 1.0;
 
@@ -795,13 +795,12 @@ void Shape_Detector::refine_shapes(int max_iter, int max_seconds) {
 	}
 	clock_t t_end = clock();
 
-	double t_all = double(t_end - t_start) / CLOCKS_PER_SEC;
+    double t_all = double(t_end - t_start) / CLOCKS_PER_SEC;
 	
 	show_result(t_all);
 
     if(_should_discretize)
         discretize_planes();
-
 
     //update color
     planes_to_colors.clear();
@@ -1743,9 +1742,6 @@ void Shape_Detector::update_regular_done_group_by_planes() {
 //update detected regular relationships
 void Shape_Detector::update_regular_relations_after_merge(int id_1,int id_2, std::vector<int> respective_planes) {
 
-
-
-	
 	// parallel
 	for (int i = 0; i < parallel_clusters_to_planes.size(); ++i) {
 		std::vector<int> this_parallel_cluser;
@@ -2057,7 +2053,7 @@ double Shape_Detector::energy_changed_second_normal(double dis, double numb, int
 		double change_fedilite = -double(lambda_fidelity)*((all_normal_diaviation + dis) / (double(number_of_assigned_points) - numb) - mean_normal_current) / (mean_normal_current);
 
 
-		double change_completness = double(lambda_c)*numb / (double(number_inlier_before_opers));
+        double change_completness = double(lambda_completeness)*numb / (double(number_inlier_before_opers));
 		
 		double change_freedom = double(lambda_regular)*change_dof / (double(freedom_of_planes_current));
 
@@ -2069,7 +2065,7 @@ double Shape_Detector::energy_changed_second_normal(double dis, double numb, int
 
 	
 
-		double change_completness = double(lambda_c)*numb / (double(ori_inliers_number));
+        double change_completness = double(lambda_completeness)*numb / (double(ori_inliers_number));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 
@@ -2081,7 +2077,7 @@ double Shape_Detector::energy_changed_second_normal(double dis, double numb, int
 		double change_fedilite = -double(lambda_fidelity)*((all_normal_diaviation + dis) / (double(number_of_assigned_points) - numb) - mean_normal_current) / (1.0);
 
 		
-		double change_completness = double(lambda_c)*numb / (double(points.size()));
+        double change_completness = double(lambda_completeness)*numb / (double(points.size()));
 		
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 
@@ -2102,7 +2098,7 @@ double Shape_Detector::energy_changed_normal(double dis, double numb, int id_pla
 
 		
 
-		double term2 = lambda_r * numb / (double(size_current_primitives));
+        double term2 = lambda_complexity * numb / (double(size_current_primitives));
 		
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(freedom_of_planes_current));
 		return(term1 + term2 + change_freedom);
@@ -2111,7 +2107,7 @@ double Shape_Detector::energy_changed_normal(double dis, double numb, int id_pla
 		double term1 = -double(lambda_fidelity)*(dis / double(number_of_assigned_points)) / (ori_mean_normal_diviation);
 
 
-		double term2 = lambda_r * numb / (double(ori_primitives_number));
+        double term2 = lambda_complexity * numb / (double(ori_primitives_number));
 		
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 		return(term1 + term2 + change_freedom);
@@ -2125,7 +2121,7 @@ double Shape_Detector::energy_changed_normal(double dis, double numb, int id_pla
 
 
 
-		double term2 = lambda_r * numb / double(fix_number_prim);
+        double term2 = lambda_complexity * numb / double(fix_number_prim);
 		
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 
@@ -2140,23 +2136,23 @@ double Shape_Detector::energy_changed_normal_merge(double dis, double numb, int 
 
 	if (weight_mode == 2) {
 		double term1 = -double(lambda_fidelity)*((all_normal_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_normal_current) / (mean_normal_current);
-		double term2 = lambda_r * numb / (double(size_current_primitives));
-		double term3 = double(lambda_c)*nmoves / (double(number_inlier_before_opers));
+        double term2 = lambda_complexity * numb / (double(size_current_primitives));
+        double term3 = double(lambda_completeness)*nmoves / (double(number_inlier_before_opers));
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(freedom_of_planes_current));
 		return(term1 + term2 + term3 + change_freedom);
 	}
 	else if (weight_mode == 1) {
 		double term1 = -double(lambda_fidelity)*((all_normal_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_normal_current) / (ori_mean_normal_diviation);
-		double term2 = lambda_r * numb / (double(ori_primitives_number));
-		double term3 = double(lambda_c)*nmoves / (double(ori_inliers_number));
+        double term2 = lambda_complexity * numb / (double(ori_primitives_number));
+        double term3 = double(lambda_completeness)*nmoves / (double(ori_inliers_number));
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 		return(term1 + term2 + term3 + change_freedom);
 	}
 	else {
 		double maxixum_freedom = 3.0* double(points.size()) / double(min_points);
 		double term1 = -double(lambda_fidelity)*((all_normal_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_normal_current) / 1.0;
-		double term2 = lambda_r * numb / double(fix_number_prim);
-		double term3 = double(lambda_c)*nmoves / (double(points.size()));
+        double term2 = lambda_complexity * numb / double(fix_number_prim);
+        double term3 = double(lambda_completeness)*nmoves / (double(points.size()));
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 		return(term1 + term2 + term3 + change_freedom);
 	}
@@ -2172,8 +2168,8 @@ double Shape_Detector::energy_changed_merge(double dis, double numb, int nmoves,
 		double term1 = double(lambda_fidelity)*((all_distance_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_distance_current) / (mean_distance_current);
 
 
-		double term2 = lambda_r * numb / (double(size_current_primitives));
-		double term3 = double(lambda_c)*nmoves / (double(number_inlier_before_opers));
+        double term2 = lambda_complexity * numb / (double(size_current_primitives));
+        double term3 = double(lambda_completeness)*nmoves / (double(number_inlier_before_opers));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(freedom_of_planes_current));
 
@@ -2184,8 +2180,8 @@ double Shape_Detector::energy_changed_merge(double dis, double numb, int nmoves,
 		double term1 = double(lambda_fidelity)*((all_distance_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_distance_current) / (ori_mean_error);
 
 
-		double term2 = lambda_r * numb / (double(ori_primitives_number));
-		double term3 = double(lambda_c)*nmoves / (double(ori_inliers_number));
+        double term2 = lambda_complexity * numb / (double(ori_primitives_number));
+        double term3 = double(lambda_completeness)*nmoves / (double(ori_inliers_number));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 
@@ -2198,8 +2194,8 @@ double Shape_Detector::energy_changed_merge(double dis, double numb, int nmoves,
 		double maxixum_freedom = 3.0* double(points.size()) / double(min_points);
 		double term1 = double(lambda_fidelity)*((all_distance_diaviation + dis) / (double(number_of_assigned_points) - nmoves) - mean_distance_current) / (epsilon);
 
-		double term2 = lambda_r * numb / (double(dem_number_shape));
-		double term3 = double(lambda_c)*nmoves / (double(points.size()));
+        double term2 = lambda_complexity * numb / (double(dem_number_shape));
+        double term3 = double(lambda_completeness)*nmoves / (double(points.size()));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 
@@ -2215,7 +2211,7 @@ double Shape_Detector::energy_changed(double dis, double numb, int id_plane) {
 		double term1 = double(lambda_fidelity)*(dis / double(number_of_assigned_points)) / (mean_distance_current);
 
 
-		double term2 = lambda_r * numb / (double(size_current_primitives));
+        double term2 = lambda_complexity * numb / (double(size_current_primitives));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(freedom_of_planes_current));
 
@@ -2224,7 +2220,7 @@ double Shape_Detector::energy_changed(double dis, double numb, int id_plane) {
 	else if (weight_mode == 1) {
 		double term1 = double(lambda_fidelity)*(dis / double(number_of_assigned_points)) / (ori_mean_error);
 
-		double term2 = lambda_r * numb / (double(ori_primitives_number));
+        double term2 = lambda_complexity * numb / (double(ori_primitives_number));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 
@@ -2236,7 +2232,7 @@ double Shape_Detector::energy_changed(double dis, double numb, int id_plane) {
 		double maxixum_freedom = 3.0* double(points.size()) / double(min_points);
 		double term1 = double(lambda_fidelity)*(dis / double(number_of_assigned_points)) / (epsilon);
 
-		double term2 = lambda_r * numb / (double(dem_number_shape));
+        double term2 = lambda_complexity * numb / (double(dem_number_shape));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 
@@ -2253,7 +2249,7 @@ double Shape_Detector::energy_changed_second(double dis, double numb, int id_pla
 
 
 
-		double change_completness = double(lambda_c)*(numb / (double(number_inlier_before_opers)));
+        double change_completness = double(lambda_completeness)*(numb / (double(number_inlier_before_opers)));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(freedom_of_planes_current));
 
@@ -2267,7 +2263,7 @@ double Shape_Detector::energy_changed_second(double dis, double numb, int id_pla
 
 
 
-		double change_completness = double(lambda_c)*(numb / (double(ori_inliers_number)));
+        double change_completness = double(lambda_completeness)*(numb / (double(ori_inliers_number)));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(ori_freedom_of_planes));
 
@@ -2279,7 +2275,7 @@ double Shape_Detector::energy_changed_second(double dis, double numb, int id_pla
 
 
 
-		double change_completness = double(lambda_c)*(numb / (double(ori_inliers_number)));
+        double change_completness = double(lambda_completeness)*(numb / (double(ori_inliers_number)));
 
 		double change_freedom = double(lambda_regular)*(change_dof) / (double(maxixum_freedom));
 
@@ -2365,7 +2361,7 @@ void Shape_Detector::planar_shape_detection_l2() {
 		//get the information before local operations.
 		get_distance_diviation();
 		number_inlier_before_opers = number_of_assigned_points;
-		if (lambda_c > 0) {
+        if (lambda_completeness > 0) {
 			//find all the insertion operations and thier energy changing.
 			get_good_points();
 		}
@@ -2476,7 +2472,7 @@ void Shape_Detector::planar_shape_detection_L1(){
 		bad_points_shape.clear();
 		get_distance_diviation();
 		number_inlier_before_opers = number_of_assigned_points;
-		if (lambda_c > 0) {
+        if (lambda_completeness > 0) {
 			get_good_points_normal();
 		}
 		//the first cycle, we do not exclude the point, since the initialized configuration is bad, there are plenty of points would be excluded befor transfer.
@@ -2585,7 +2581,7 @@ void Shape_Detector::planar_shape_detection_hybrid() {
 		get_distance_diviation();
 		number_inlier_before_opers = number_of_assigned_points;
 
-		if (lambda_c > 0) {
+        if (lambda_completeness > 0) {
 			get_good_points();
 		}
 		if (timett > 1) {
@@ -3487,8 +3483,6 @@ void Shape_Detector::calculate_energy_changing_for_regularization_initialization
 
 //Loop until there is no more satisfied operation that can reduce the energy.
 
-
-
 //****Fidelity metirc: L2.
 void Shape_Detector::local_operators() {
 	//points_changed = std::vector<int>(points.size(), 0);
@@ -3505,12 +3499,7 @@ void Shape_Detector::local_operators() {
 	t_insert = 0;
 	t_regularization = 0;
 
-
-
-
-	
 	std::priority_queue<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>, std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>>, Weight_Comparator_with_energy> p_q;
-
 	std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>> v_p_q;
 
 	std::vector<std::vector<int>> max_list_vector;
@@ -3522,7 +3511,6 @@ void Shape_Detector::local_operators() {
 		std::vector<int> one = primitive_connection[i];
 		for (int j = i + 1; j < one.size(); ++j) {
 			if (one[j] >= 1) {
-
 
 				std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 				//check if i and j primitives can be merged.
@@ -3537,7 +3525,6 @@ void Shape_Detector::local_operators() {
 	}
 
 	//Put all the splitting operations to the priority queue.
-
 	for (int i = 0; i < planes_to_inliers.size(); ++i) {
 
 		if (region_type[i] > 5) continue;
@@ -3549,28 +3536,19 @@ void Shape_Detector::local_operators() {
 		p_q.push(one_element);
 		v_p_q.push_back(one_element);
 
-
-
-
 	}
 
 	//Put all the exclusion operations to the priority queue.
-
 	for (int i = 0; i < bad_points_shape.size(); ++i) {
 		std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 		bool if_satisfied = convert_form_exclude_l2(i, one_element);
 		if (!if_satisfied) continue;
 		p_q.push(one_element);
 		v_p_q.push_back(one_element);
-
 	}
 
 	//Put all the insersion operations to the priority queue.
-
 	for (int i = 0; i < good_points_shape.size(); ++i) {
-
-
-
 
 		std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 		bool if_satisfied = convert_form_insert_l2(i, one_element);
@@ -3582,7 +3560,6 @@ void Shape_Detector::local_operators() {
 	}
 
 	//Put all the regularity operations to the priority queue.
-
 	for (int i = 0; i < energy_changing_initial_regularization.size(); ++i) {
 		std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 		bool if_satisfied = convert_form_regularization_l2(i, one_element);
@@ -3590,28 +3567,17 @@ void Shape_Detector::local_operators() {
 
 		p_q.push(one_element);
 		v_p_q.push_back(one_element);
-
 	}
 
-
-
-
-
 	do {
-
 		bb = true;
-
 		std::vector<int> if_merged;
 		if_merged = std::vector<int>(planes_to_inliers.size(), -1);
 
-
-
 		std::vector<int> one_merged;
-
 		std::vector<int> max_list;
 		std::vector<int> min_list;
 		std::vector<int> id_of_moved_merge;
-
 
 		int one_splite = -1;
 		std::vector<int> one_remove;
@@ -3631,10 +3597,6 @@ void Shape_Detector::local_operators() {
 
 				int f = this_pair[0];
 				int s = this_pair[1];
-
-
-
-
 
 				double after_operation_distance_visual = all_distance_diaviation + p_q.top().second[1];
 				//if constraint, the changed configuration should have higher fidelity, completenness and simplicity than original one.
@@ -3809,12 +3771,8 @@ void Shape_Detector::local_operators() {
 			}
 			else if (p_q.top().first.first == 4) {
 				//insertion operation.
-
-
-
 				int plane_id = p_q.top().first.second[0];
 
-			
 				double after_add_distance = all_distance_diaviation + p_q.top().second[1];
 				if (if_constraint) {
 					if (after_add_distance / double(number_of_assigned_points - 1 + p_q.top().first.second.size()) >= ori_mean_error) {
@@ -3824,7 +3782,6 @@ void Shape_Detector::local_operators() {
 					}
 				}
 				if (planes_to_inliers[plane_id].size() - 1 + p_q.top().first.second.size() < min_points) {
-
 					p_q.pop();
 				}
 				else {
@@ -3852,29 +3809,17 @@ void Shape_Detector::local_operators() {
 			else if (p_q.top().first.first == 5) {
 				//regularity operation
 
-
 				if (lambda_regular == 0) {
 					p_q.pop();
-
 					continue;
-
 				}
 
-
 				id_parallel_cluster = p_q.top().first.second[0];
-				
-				
 				// the operation is skipped if it containes regularized primitives.
-			
 				if (!if_regularization_can_conducted[id_parallel_cluster]) {
 					p_q.pop();
 					continue;
 				}
-				
-
-				
-
-
 
 				double after_add_distance = all_distance_diaviation + p_q.top().second[1];
 				if (if_constraint) {
@@ -3891,14 +3836,10 @@ void Shape_Detector::local_operators() {
 				all_distance_diaviation = after_add_distance;
 				mean_distance_current = all_distance_diaviation / number_of_assigned_points;
 
-
 				p_q.pop();
 				t_m++;
 				t_regularization++;
-
 				break;
-
-
 			}
 		}
 		//conduct the merging operation
@@ -3907,12 +3848,8 @@ void Shape_Detector::local_operators() {
 			int last_size = planes_2.size();
 			std::vector<int> respective_planes = std::vector<int>(last_size, -1);
 
-
 			int id_1 = one_merged[0];
 			int id_2 = one_merged[1];
-
-
-			
 
 			std::vector<int> one_merge_points_real;
 			std::vector<int> one_merge_points = planes_to_inliers[id_1];
@@ -4051,17 +3988,10 @@ void Shape_Detector::local_operators() {
 
 
 				}
-
 				planes_if_regularized.push_back(false);
 
-
-				
 				//update detected regular relationships, because id of plane has been changed.
 				update_regular_relations_after_merge(id_1, id_2, respective_planes);
-
-			
-
-
 
 				planes_to_inliers.push_back(one_merge_points);
 				planes_centroids_coplanar.push_back(get_specific_centroids(planes_to_inliers.size() - 1));
@@ -4071,7 +4001,6 @@ void Shape_Detector::local_operators() {
 				inliers.reserve(one_merge_points.size());
 
 				for (int jj = 0; jj < one_merge_points.size(); ++jj) {
-
 					inliers.push_back(points[one_merge_points[jj]].first);
 
 				}
@@ -4121,13 +4050,8 @@ void Shape_Detector::local_operators() {
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
 
-
-
 						}
-
 						else {
-
-
 
 							std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 
@@ -4137,20 +4061,12 @@ void Shape_Detector::local_operators() {
 							one_element = std::make_pair(std::make_pair(1, o), one_p_q.second);
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
-
-
 						}
 					}
 					else if (one_p_q.first.first == 2) {
 						std::vector<int> this_reg = one_p_q.first.second;
 						if (if_merged[this_reg[0]] == 0)//when the primitive has been merged.
-						{
-
-							continue;
-						}
-
+                        {continue;}
 						else {
 							std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 
@@ -4160,7 +4076,6 @@ void Shape_Detector::local_operators() {
 							one_element = std::make_pair(std::make_pair(2, o), one_p_q.second);
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
 
 						}
 
@@ -4180,10 +4095,7 @@ void Shape_Detector::local_operators() {
 							one_element = std::make_pair(std::make_pair(3, o), one_p_q.second);
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
 						}
-
 					}
 					else if (one_p_q.first.first == 4) {
 						std::vector<int> this_p_p = one_p_q.first.second;
@@ -4200,8 +4112,6 @@ void Shape_Detector::local_operators() {
 							one_element = std::make_pair(std::make_pair(4, o), one_p_q.second);
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
 						}
 
 					}
@@ -4216,11 +4126,7 @@ void Shape_Detector::local_operators() {
 
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
-
 						}
-
 					}
 				}
 
@@ -4247,13 +4153,9 @@ void Shape_Detector::local_operators() {
 					p_q.push(one_element_g);
 					local_v_p_q.push_back(one_element_g);
 				}
-
 				v_p_q.clear();
 				v_p_q = local_v_p_q;
-
-
 			}
-
 		}
 		//conduct splitting operation
 		else if (one_merged.size() == 0 && one_splite != -1 && one_remove.size() == 0 && one_add.size() == 0 && regularization_planes.size() == 0) {
@@ -4279,19 +4181,12 @@ void Shape_Detector::local_operators() {
 
 			}
 
-		
-
-
 			planes_to_inliers.erase(planes_to_inliers.begin() + one_splite);
 			region_type.push_back(region_type[one_splite]);
 			region_type.push_back(region_type[one_splite]);
 			region_type.erase(region_type.begin() + one_splite);
 
-
-
-
 			planes_2.erase(planes_2.begin() + one_splite);
-
 
 			planes_to_coplanar_done.erase(planes_to_coplanar_done.begin() + one_splite);
 			planes_to_coplanar_done.push_back(-1);
@@ -4303,20 +4198,13 @@ void Shape_Detector::local_operators() {
 			planes_to_orthogonal_done.push_back(-1);
 			planes_to_orthogonal_done.push_back(-1);
 
-
-
-
 			planes_to_inliers.push_back(max_list);
 			planes_to_inliers.push_back(min_list);
-
-
-
 
 			planes_if_regularized.erase(planes_if_regularized.begin() + one_splite);
 			planes_if_regularized.push_back(false);
 			planes_if_regularized.push_back(false);
 
-		
 			planes_centroids_coplanar.erase(planes_centroids_coplanar.begin() + one_splite);
 			planes_centroids_coplanar.push_back(get_specific_centroids(planes_to_inliers.size() - 1));
 			planes_centroids_coplanar.push_back(get_specific_centroids(planes_to_inliers.size() - 2));
@@ -4325,66 +4213,48 @@ void Shape_Detector::local_operators() {
 			planes_centroids.push_back(get_specific_centroids(planes_to_inliers.size() - 1));
 			planes_centroids.push_back(get_specific_centroids(planes_to_inliers.size() - 2));
 
-
 			update_regular_relations_after_splite(one_splite, respective_planes);
 		
-
-
 			std::vector<Inexact_Point_3> max_inliers;
 			max_inliers.reserve(max_list.size());
-
 			for (int jj = 0; jj < max_list.size(); ++jj) {
-				
 				max_inliers.push_back(points[max_list[jj]].first);
-
 			}
 			Inexact_Plane max_plane;
 			if (max_inliers.size() < 3) {
-
 				getchar();
 			}
 			linear_least_squares_fitting_3(max_inliers.begin(), max_inliers.end(), max_plane, CGAL::Dimension_tag<0>());
-
 			planes_2.push_back(max_plane);
 		
-
-
 			std::vector<Inexact_Point_3> min_inliers;
 			min_inliers.reserve(min_list.size());
 
 			for (int jj = 0; jj < min_list.size(); ++jj) {
-				
 				min_inliers.push_back(points[min_list[jj]].first);
-
 			}
 			Inexact_Plane min_plane;
 			if (min_inliers.size() < 3) {
-
 				getchar();
 			}
 			linear_least_squares_fitting_3(min_inliers.begin(), min_inliers.end(), min_plane, CGAL::Dimension_tag<0>());
 
 			planes_2.push_back(min_plane);
 		
-
 			std::vector<int> inliers_to_planes_merge_local;
 			inliers_to_planes_merge_local = std::vector<int>(points.size(), -1);
 			for (int m = 0; m < planes_to_inliers.size(); ++m) {
 				for (int k = 0; k < planes_to_inliers[m].size(); ++k) {
 					inliers_to_planes_merge_local[planes_to_inliers[m][k]] = m;
 				}
-
-
 			}
 			inliers_to_planes.clear();
 			inliers_to_planes = inliers_to_planes_merge_local;
 			update_regular_done_group_by_planes();
-				
 			
 			//update energy function
 			std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>> local_v_p_q;
 			p_q = std::priority_queue<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>, std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>>, Weight_Comparator_with_energy>();
-
 			
 			for (std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_p_q : v_p_q) {
 				if (one_p_q.first.first == 1) {
@@ -4402,25 +4272,15 @@ void Shape_Detector::local_operators() {
 
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
-
-
 						}
 						if (test_if_connected(respective_planes[this_pair[1]], planes_to_inliers.size() - 2)) {
 							std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 							bool if_satisfied = convert_form_merge_l2(planes_to_inliers.size() - 2, respective_planes[this_pair[1]], one_element);
 							if (!if_satisfied) continue;
 
-
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
 						}
-
-
-
 					}
 					else if (if_merged[this_pair[0]] != 0 && if_merged[this_pair[1]] == 0) {
 						if (test_if_connected(respective_planes[this_pair[0]], planes_to_inliers.size() - 1)) {
@@ -4431,7 +4291,6 @@ void Shape_Detector::local_operators() {
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
 
-
 						}
 						if (test_if_connected(respective_planes[this_pair[0]], planes_to_inliers.size() - 2)) {
 							std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
@@ -4440,11 +4299,7 @@ void Shape_Detector::local_operators() {
 
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
 						}
-
-
 					}
 					else {
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
@@ -4455,17 +4310,13 @@ void Shape_Detector::local_operators() {
 						one_element = std::make_pair(std::make_pair(1, o), one_p_q.second);
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
 					}
 				}
 				else if (one_p_q.first.first == 2) {
 					std::vector<int> this_reg = one_p_q.first.second;
 					//double this_weight = p_q_c.top().second;
 					if (if_merged[this_reg[0]] == 0)
-					{
-
-						continue;
-					}
+                    {continue;}
 
 					else {
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
@@ -4476,16 +4327,12 @@ void Shape_Detector::local_operators() {
 						one_element = std::make_pair(std::make_pair(2, o), one_p_q.second);
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
-
 					}
-
 				}
 				else if (one_p_q.first.first == 3) {
 					std::vector<int> this_p_p = one_p_q.first.second;
-					if (if_merged[this_p_p[0]] == 0) {
-						continue;
-					}
+                    if (if_merged[this_p_p[0]] == 0)
+                    {continue;}
 					else {
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 
@@ -4496,16 +4343,12 @@ void Shape_Detector::local_operators() {
 						one_element = std::make_pair(std::make_pair(3, o), one_p_q.second);
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
-
 					}
-
 				}
 				else if (one_p_q.first.first == 4) {
 					std::vector<int> this_p_p = one_p_q.first.second;
-					if (if_merged[this_p_p[0]] == 0) {
-						continue;
-					}
+                    if (if_merged[this_p_p[0]] == 0)
+                    {continue;}
 					else {
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
 
@@ -4516,16 +4359,12 @@ void Shape_Detector::local_operators() {
 						one_element = std::make_pair(std::make_pair(4, o), one_p_q.second);
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
-
 					}
-
 				}
 				else if (one_p_q.first.first == 5) {
 					std::vector<int> this_p_p = one_p_q.first.second;
-					if ( !if_regularization_can_conducted[this_p_p[0]]) {
-						continue;
-					}
+                    if ( !if_regularization_can_conducted[this_p_p[0]])
+                    {continue;}
 					else {
 
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
@@ -4533,9 +4372,6 @@ void Shape_Detector::local_operators() {
 
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
-
-
 					}
 				}
 			}
@@ -4583,11 +4419,8 @@ void Shape_Detector::local_operators() {
 				p_q.push(one_element_g_2);
 				local_v_p_q.push_back(one_element_g_2);
 			}
-
 			v_p_q.clear();
 			v_p_q = local_v_p_q;
-
-
 
 		}
 		//conduct exclusion operation
@@ -4602,12 +4435,7 @@ void Shape_Detector::local_operators() {
 					chaged_in_p.push_back(id);
 				}
 			}
-			
-
 			planes_to_inliers[one_remove_plane] = chaged_in_p;
-
-
-
 
 			std::vector<Inexact_Point_3> chaged_in_p_inliers;
 			chaged_in_p_inliers.reserve(chaged_in_p.size());
@@ -4633,13 +4461,9 @@ void Shape_Detector::local_operators() {
 					for (int k = 0; k < planes_to_inliers[m].size(); ++k) {
 						inliers_to_planes_merge_local[planes_to_inliers[m][k]] = m;
 					}
-
-
 				}
 				inliers_to_planes.clear();
 				inliers_to_planes = inliers_to_planes_merge_local;
-
-
 				
 				planes_centroids_coplanar[one_remove_plane] = get_specific_centroids(one_remove_plane);
 				planes_centroids[one_remove_plane] = get_specific_centroids(one_remove_plane);
@@ -4651,13 +4475,10 @@ void Shape_Detector::local_operators() {
 
 				planes_to_orthogonal_done[one_remove_plane] = -1;
 
-
-
 				update_regular_relations_after_add_remove(one_remove_plane);
 				
 				update_regular_done_group_by_planes();
 				
-
 				//update priority queue
 				std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>> local_v_p_q;
 				
@@ -4673,25 +4494,12 @@ void Shape_Detector::local_operators() {
 							bool if_satisfied = convert_form_merge_l2(this_pair[0], this_pair[1], one_element);
 							if (!if_satisfied) continue;
 
-
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
-
-
 						}
-
 						else {
-
-
 							p_q.push(one_p_q);
 							local_v_p_q.push_back(one_p_q);
-
-
-
-
-
 						}
 					}
 					else if (one_p_q.first.first == 2) {
@@ -4705,18 +4513,11 @@ void Shape_Detector::local_operators() {
 
 							p_q.push(one_element_1);
 							local_v_p_q.push_back(one_element_1);
-
-
 						}
-
 						else {
-
 							p_q.push(one_p_q);
 							local_v_p_q.push_back(one_p_q);
-
-
 						}
-
 					}
 					else if (one_p_q.first.first == 3) {
 						std::vector<int> this_p_p = one_p_q.first.second;
@@ -4729,25 +4530,14 @@ void Shape_Detector::local_operators() {
 								p_q.push(one_element_b);
 								local_v_p_q.push_back(one_element_b);
 							}
-
-
-
-
 						}
-
-
 						else {
-
 							p_q.push(one_p_q);
 							local_v_p_q.push_back(one_p_q);
-
-
 						}
-
 					}
 					else if (one_p_q.first.first == 4) {
 						std::vector<int> this_p_p = one_p_q.first.second;
-
 
 						if (if_merged[this_p_p[0]] == 0) {
 							std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element_g;
@@ -4758,15 +4548,11 @@ void Shape_Detector::local_operators() {
 							}
 
 						}
-
 						else {
 
 							p_q.push(one_p_q);
 							local_v_p_q.push_back(one_p_q);
-
-
 						}
-
 					}
 					else if (one_p_q.first.first == 5) {
 						std::vector<int> this_p_p = one_p_q.first.second;
@@ -4781,20 +4567,13 @@ void Shape_Detector::local_operators() {
 
 							p_q.push(one_element);
 							local_v_p_q.push_back(one_element);
-
-
-
 						}
 
 					}
 				}
-
-
 				v_p_q.clear();
 				v_p_q = local_v_p_q;
-
 			}
-
 		}
 		//conduct insertion operation		
 		else if (one_merged.size() == 0 && one_splite == -1 && one_remove.size() == 0 && one_add.size() != 0 && regularization_planes.size() == 0) {
@@ -4995,10 +4774,7 @@ void Shape_Detector::local_operators() {
 		//conduct regularity operation
 		else if (one_merged.size() == 0 && one_splite == -1 && one_remove.size() == 0 && one_add.size() == 0 && regularization_planes.size() != 0) {
 		
-
 			if_regularization_can_conducted[id_parallel_cluster] = false;
-
-
 
 			//change planes function
 		
@@ -5094,22 +4870,11 @@ void Shape_Detector::local_operators() {
 						if_regularization_can_conducted[iii] = false;
 					}
 				}
-
-
 			}
-			
-			
-
-		
 			update_regular_done_group_by_planes();
-			
-			
-
 
 			//update priority queue
-			
 			std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>> local_v_p_q;
-			
 			p_q = std::priority_queue<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>, std::vector<std::pair<std::pair<int, std::vector<int>>, std::vector<double>>>, Weight_Comparator_with_energy>();
 
 			for (std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_p_q : v_p_q) {
@@ -5118,7 +4883,6 @@ void Shape_Detector::local_operators() {
 
 					std::vector<int> this_pair = one_p_q.first.second;
 
-
 					if (if_merged[this_pair[0]] == 0 || if_merged[this_pair[1]] == 0) {
 
 						std::pair<std::pair<int, std::vector<int>>, std::vector<double>> one_element;
@@ -5126,10 +4890,6 @@ void Shape_Detector::local_operators() {
 						if (!if_satisfied) continue;
 						p_q.push(one_element);
 						local_v_p_q.push_back(one_element);
-
-
-
-
 					}
 
 					else {
@@ -7874,26 +7634,26 @@ void Shape_Detector::get_distance_diviation_show_merge_info(double t) {
 	freedom_of_planes_current = freedom_of_planes;
 	double new_coverage = double(number_of_assigned_points) / double(points.size());
 
-    _logger->debug("Local operators: {} times" ,t);
-    _logger->debug("Merge operators: {} times",t_merge);
-    _logger->debug("Split operators: {} times" , t_split );
-    _logger->debug("Insert operators: {} times",t_insert );
-    _logger->debug("Exclude operators: {} times",t_exlude );
-    _logger->debug("Regularity operators: {} times", t_regularization);
+//    _logger->debug("Local operators: {} times" ,t);
+//    _logger->debug("Merge operators: {} times",t_merge);
+//    _logger->debug("Split operators: {} times" , t_split );
+//    _logger->debug("Insert operators: {} times",t_insert );
+//    _logger->debug("Exclude operators: {} times",t_exlude );
+//    _logger->debug("Regularity operators: {} times", t_regularization);
 
-    _logger->debug("Primitives : {}" ,size_current_primitives);
+//    _logger->debug("Primitives : {}" ,size_current_primitives);
 
-    _logger->debug("Coverage  : {}" , new_coverage);
-    _logger->debug("Mean error : {}" , (mean_distance_diaviation) );
-    _logger->debug("Mean normal deviation : {}" , (mean_normal_diviation) );
-    _logger->debug("Degree of freedom : {}" , (freedom_of_planes));
+//    _logger->debug("Coverage  : {}" , new_coverage);
+//    _logger->debug("Mean error : {}" , (mean_distance_diaviation) );
+//    _logger->debug("Mean normal deviation : {}" , (mean_normal_diviation) );
+//    _logger->debug("Degree of freedom : {}" , (freedom_of_planes));
 
-    _logger->debug("Primitives reducing : {}" , (old_size_current_primitives - size_current_primitives));
+//    _logger->debug("Primitives reducing : {}" , (old_size_current_primitives - size_current_primitives));
 
-    _logger->debug("Coverage adding   : {}" , new_coverage - old_coverage );
-    _logger->debug("Mean error reducing : {}" , (old_mean_distance_diaviation - mean_distance_diaviation) );
-    _logger->debug("Mean normal deviation adding : {}" , (mean_normal_diviation - old_mean_normal_diaviation) );
-    _logger->debug("Degree of freedom changing : {}", (freedom_of_planes-old_freedom_of_planes));
+//    _logger->debug("Coverage adding   : {}" , new_coverage - old_coverage );
+//    _logger->debug("Mean error reducing : {}" , (old_mean_distance_diaviation - mean_distance_diaviation) );
+//    _logger->debug("Mean normal deviation adding : {}" , (mean_normal_diviation - old_mean_normal_diaviation) );
+//    _logger->debug("Degree of freedom changing : {}", (freedom_of_planes-old_freedom_of_planes));
 
 	old_size_current_primitives = size_current_primitives;
 	old_mean_distance_diaviation = mean_distance_diaviation;
@@ -7949,31 +7709,25 @@ void Shape_Detector::get_distance_diviation_show_normal_info(double t) {
 
 	double new_coverage = double(number_of_assigned_points) / double(points.size());
 
+//    _logger->debug("Transfer operator: {} s." , t );
+//    _logger->debug("Primitives : {}" , (size_current_primitives));
 
+//    _logger->debug("Coverage  : {}" , (new_coverage) );
+//    _logger->debug("Mean error : {}" , (mean_distance_diaviation) );
+//    _logger->debug("Mean normal deviation : {}" , (mean_normal_diviation));
+//    _logger->debug("Degree of freedom : {}" , (freedom_of_planes));
+//    _logger->debug("Primitives reducing : {}" , (old_size_current_primitives - size_current_primitives));
 
+//    _logger->debug("Coverage adding   : {}" , new_coverage - old_coverage );
+//    _logger->debug("Mean error reducing : {}" ,(old_mean_distance_diaviation - mean_distance_diaviation));
+//    _logger->debug("Mean normal deviation adding : {}" , (mean_normal_diviation - old_mean_normal_diaviation) );
+//    _logger->debug("Degree of freedom changing : {}" , (freedom_of_planes - old_freedom_of_planes));
 
-
-    _logger->debug("Transfer operator: {} s." , t );
-    _logger->debug("Primitives : {}" , (size_current_primitives));
-
-    _logger->debug("Coverage  : {}" , (new_coverage) );
-    _logger->debug("Mean error : {}" , (mean_distance_diaviation) );
-    _logger->debug("Mean normal deviation : {}" , (mean_normal_diviation));
-    _logger->debug("Degree of freedom : {}" , (freedom_of_planes));
-    _logger->debug("Primitives reducing : {}" , (old_size_current_primitives - size_current_primitives));
-
-    _logger->debug("Coverage adding   : {}" , new_coverage - old_coverage );
-    _logger->debug("Mean error reducing : {}" ,(old_mean_distance_diaviation - mean_distance_diaviation));
-    _logger->debug("Mean normal deviation adding : {}" , (mean_normal_diviation - old_mean_normal_diaviation) );
-    _logger->debug("Degree of freedom changing : {}" , (freedom_of_planes - old_freedom_of_planes));
 	old_size_current_primitives = size_current_primitives;
 	old_mean_distance_diaviation = mean_distance_diaviation;
 	old_coverage = new_coverage;
 	old_mean_normal_diaviation = mean_normal_diviation;
 	old_freedom_of_planes = freedom_of_planes;
-
-
-
 
 }
 
@@ -8649,9 +8403,9 @@ void Shape_Detector::set_constraint(bool cc) {
 }
 
 
-void Shape_Detector::set_lambda_r(double db) {
-	lambda_r = db;
-    _logger->debug("lambda_r {}",lambda_r );
+void Shape_Detector::set_lambda_complexity(double db) {
+    lambda_complexity = db;
+    _logger->debug("lambda_complexity {}",lambda_complexity);
 
 }
 
@@ -8661,9 +8415,9 @@ void Shape_Detector::set_lambda_regularity(double db) {
     _logger->debug("lambda_regular {}",lambda_regular );
 
 }
-void Shape_Detector::set_lambda_c(double db) {
-	lambda_c = db;
-    _logger->debug("lambda_c {}" ,lambda_c);
+void Shape_Detector::set_lambda_completeness(double db) {
+    lambda_completeness = db;
+    _logger->debug("lambda_completeness {}" ,lambda_completeness);
 
 }
 void Shape_Detector::set_lambda_fidelity(double db) {
@@ -9860,8 +9614,9 @@ void Shape_Detector::discretize_planes()
 
 			for (std::list<int>::const_iterator it_p = parallel_planes.begin(); it_p != parallel_planes.end(); it_p++) {
 				const Inexact_Plane & Q = planes_2[*it_p];
-				Inexact_Vector_3 dP (Q.projection(O) - O);
-				double dP_norm = sqrt(dP.squared_length());
+                Inexact_Vector_3 dP (Q.projection(O) - O);
+                double dP_norm = sqrt(dP.squared_length());
+
 
 				if (dP_norm < dist_min) {
 					dist_min = dP_norm;

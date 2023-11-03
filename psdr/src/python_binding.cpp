@@ -1,7 +1,4 @@
-//#include <iostream>
 #include <python_binding.h>
-//#include <random>
-//#include <sys/stat.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/ndarray.h>
@@ -113,7 +110,10 @@ int pyPSDR::load_points(const array3& points, const array3& normals){
 
 int pyPSDR::load_points(const array3& points){
 
+    // TODO: load points without normals and estimate them
+
     _SD.points.clear();
+    _SD._logger->error("Not implemented error.");
 
 //    _logger->warn("input .ply file does not contain valid 'normals'. 'normals' will be estimated.");
 
@@ -138,39 +138,65 @@ int pyPSDR::load_points(const array3& points){
 
 }
 
-
-
-
-int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_normal_threshold = 0.85, int knn = 10,
-                   bool regularize = false, bool discretize = false){
-
-
-
+int pyPSDR::detect(int rg_min_points = 25, double rg_epsilon = 0.2, double rg_normal_threshold = 0.85, int knn = 10){
 
     _SD.set_detection_parameters(rg_min_points, rg_epsilon, knn, rg_normal_threshold);
-    if(regularize)
-        _SD.set_regularization_parameters(5, rg_epsilon/2.0); // not called anywhere
-    if(discretize)
-        _SD.set_discretization_parameters(0.5, rg_epsilon/2.0);
-
     return _SC.detect();
 }
 
-int pyPSDR::refine(int max_iterations = -1, int max_seconds = -1,
-                   bool regularize = false, bool discretize = false){
+//void pyPSDR::set_complexity(double v){
+//    _SD.set_lambda_complexity(v);
+//}
+//void pyPSDR::set_completeness(double v){
+//    _SD.set_lambda_completeness(v);
+//}
+//void pyPSDR::set_regularity(double v){
+//    _SD.set_lambda_regularity(v);
+//}
+//void pyPSDR::set_fidelity(double v){
+//    _SD.set_lambda_fidelity(v);
+//}
 
+void pyPSDR::set_regularization(double v, double w){
+    _SD.set_regularization_parameters(v, w); // not called anywhere
+}
+void pyPSDR::set_regularization(){
+
+    _SD.set_regularization_parameters(5, _SD.get_epsilon()/2.0); // not called anywhere
+}
+void pyPSDR::set_discretization(double v, double w){
+    _SD.set_discretization_parameters(v, w);
+}
+void pyPSDR::set_discretization(){
+    _SD.set_discretization_parameters(0.5, _SD.get_epsilon()/2.0);
+}
+
+
+int pyPSDR::refine(int max_iterations = -1, int max_seconds = -1,
+                   double complexity = 1.0, double completeness = 1.0, double regularity = 1.0, double fidelity = 1.0){
+
+    if(complexity+completeness+regularity+fidelity>4.0){
+        _SD._logger->error("complexity+completeness+regularity+fidelity cannot be > 4.0.");
+        return 1;
+    }
+    if(complexity*completeness*regularity*fidelity==0.0){
+        _SD._logger->error("complexity or completeness or regularity or fidelity cannot equal 0.0");
+        return 1;
+    }
+
+    //if constraint is set, the mean distance should be smaller than the original one (the configuration of region growing).
     _SD.set_constraint(false);
+
+
     _SD.set_weight_m(0);
+
+    // 0 = hybrid, 1 = L1.1 (normal variation), 2 = L2 (point dist)
     _SD.set_metric_type(0);
-    _SD.set_lambda_c(1.0);
-    _SD.set_lambda_r(1.0);
-    _SD.set_lambda_regularity(1.0);
-    _SD.set_lambda_fidelity(1.0);
-    double epsilon = _SD.get_epsilon();
-    if(regularize)
-        _SD.set_regularization_parameters(5, epsilon/2.0); // not called anywhere
-    if(discretize)
-        _SD.set_discretization_parameters(0.5, epsilon/2.0);
+
+    _SD.set_lambda_complexity(complexity);
+    _SD.set_lambda_completeness(completeness);
+    _SD.set_lambda_regularity(regularity);
+    _SD.set_lambda_fidelity(fidelity);
 
     return _SC.refine(max_iterations, max_seconds);
 }
@@ -187,10 +213,17 @@ NB_MODULE(pypsdr_ext, m){
             .def("load_points", nb::overload_cast<const array3&, const array3&, const array1&>(&pyPSDR::load_points), "points"_a, "normals"_a, "classes"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&, const array3&>(&pyPSDR::load_points), "points"_a, "normals"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&>(&pyPSDR::load_points), "points"_a ,"Load points from a numpy array.")
-            .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10, "regularization"_a = false, "discretization"_a = false,
-                 "Detect planar shapes.")
-            .def("refine", &pyPSDR::refine, "max_iterations"_a = -1, "max_seconds"_a = -1, "regularize"_a = false, "discretize"_a = false,
+            .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10,"Detect planar shapes.")
+            .def("refine", &pyPSDR::refine,
+                 "max_iterations"_a = -1, "max_seconds"_a = -1,
+                 "complexity"_a = 1.0, "completeness"_a = 1.0, "regularity"_a = 1.0, "fidelity"_a = 1.0,
                  "Refine planar shapes.")
+//            .def("set_complexity", &pyPSDR::set_complexity, "complexity"_a, "Set complexity parameter for refinement.")
+//            .def("set_completeness", &pyPSDR::set_completeness, "completeness"_a, "Set completeness parameter for refinement.")
+//            .def("set_regularity", &pyPSDR::set_regularity, "regularity"_a, "Set regularity parameter for refinement.")
+//            .def("set_fidelity", &pyPSDR::set_fidelity, "fidelity"_a, "Set fidelity parameter for refinement.")
+            .def("set_discretization", nb::overload_cast<>(&pyPSDR::set_discretization), "Set discretization to 0.5 angle and epsilon/2.0 distance bins.")
+            .def("set_discretization", nb::overload_cast<double,double>(&pyPSDR::set_discretization), "Set discretization parameters.")
             .def("save", &pyPSDR::save, "file"_a, "primitive_type"_a = "convex", "Save planar shapes to file.");
 }
 

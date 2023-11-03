@@ -227,9 +227,9 @@ public:
 
 	void set_constraint(bool cc);
 
-	void set_lambda_r(double db);
+    void set_lambda_complexity(double db);
 
-	void set_lambda_c(double db);
+    void set_lambda_completeness(double db);
 
 	void set_lambda_regularity(double db);
 
@@ -406,10 +406,10 @@ public:
 	bool if_constraint;
 
 
-	double lambda_r;
+    double lambda_complexity;
 	double lambda_regular;
 	int weight_mode;
-	double lambda_c;
+    double lambda_completeness;
 	double lambda_fidelity;
 
     int metric_type;

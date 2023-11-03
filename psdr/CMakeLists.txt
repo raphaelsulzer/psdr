@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14.0)
-project(Planar_Shape_Detection LANGUAGES CXX)
+project(psdr LANGUAGES CXX)
 
 ######################################################
 ###################### SETTINGS ######################
