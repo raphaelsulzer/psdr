@@ -5,7 +5,7 @@
 #include <CGAL/compute_average_spacing.h>
 #include <CGAL/estimate_scale.h>
 #include <CGAL/jet_estimate_normals.h>
-#include <CGAL/Shape_regularization/regularize_planes.h>
+//#include <CGAL/Shape_regularization/regularize_planes.h>
 #include <CGAL/Classification/property_maps.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -743,36 +743,36 @@ void Shape_Detector::detect_shapes()
 
 
 
-void Shape_Detector::regularize_shapes()
-{
-    regularize_planes();
-    if(_should_discretize)
-        discretize_planes();
-    get_coverage_and_mean_error();
-}
+//void Shape_Detector::regularize_shapes()
+//{
+//    regularize_planes();
+//    if(_should_discretize)
+//        discretize_planes();
+//    get_coverage_and_mean_error();
+//}
 
-void Shape_Detector::regularize_planes()
-{
+//void Shape_Detector::regularize_planes()
+//{
 
-    _logger->debug( "tolerance_angle  = {}", tolerance_angle);
-    _logger->debug( "tolerance_coplanarity  = {}", tolerance_coplanarity);
+//    _logger->debug( "tolerance_angle  = {}", tolerance_angle);
+//    _logger->debug( "tolerance_coplanarity  = {}", tolerance_coplanarity);
 
-    clock_t t_regularize_start = clock();
-    planes_1 = planes_0;
+//    clock_t t_regularize_start = clock();
+//    planes_1 = planes_0;
 
-    CGAL::Shape_regularization::Planes::regularize_planes(points,
-            Point_map(),
-            planes_1,
-            CGAL::Identity_property_map<Inexact_Plane>(),
-            Shape_Detector_Index_Map(inliers_to_planes),
-            true, true, true, false,
-            tolerance_angle,
-            tolerance_coplanarity,
-            Inexact_Vector_3(0, 0, 1));
+//    CGAL::Shape_regularization::Planes::regularize_planes(points,
+//            Point_map(),
+//            planes_1,
+//            CGAL::Identity_property_map<Inexact_Plane>(),
+//            Shape_Detector_Index_Map(inliers_to_planes),
+//            true, true, true, false,
+//            tolerance_angle,
+//            tolerance_coplanarity,
+//            Inexact_Vector_3(0, 0, 1));
 
-    clock_t t_regularize_end = clock();
-    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
-}
+//    clock_t t_regularize_end = clock();
+//    _logger->debug("Plane regularization done in {} s.",double(t_regularize_end - t_regularize_start) / CLOCKS_PER_SEC);
+//}
 
 void Shape_Detector::refine_shapes(int max_iter, int max_seconds) {
 

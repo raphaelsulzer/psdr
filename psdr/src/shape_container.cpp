@@ -40,17 +40,17 @@ int Shape_Container::detect()
 
 }
 
-void Shape_Container::regularize()
-{
-    SD->regularize_shapes();
-    SD->set_primitives();
+//void Shape_Container::regularize()
+//{
+//    SD->regularize_shapes();
+//    SD->set_primitives();
 
-    copy_primitives_from_detector();
-    copy_support_planes_from_detector();
-    SD->clear_primitives();
+//    copy_primitives_from_detector();
+//    copy_support_planes_from_detector();
+//    SD->clear_primitives();
 
-    discard_degenerate_primitives();
-}
+//    discard_degenerate_primitives();
+//}
 
 int Shape_Container::refine(int max_iter, int max_seconds) {
 
