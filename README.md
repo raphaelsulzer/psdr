@@ -49,12 +49,15 @@ ps = psdr(verbosity=1)
 
 # load input point cloud                                         
 ps.load_points("example/data/anchor/pointcloud.ply")
+bb_diagonal = ps.get_bounding_box_diagonal()
 
-# detect planar shapes
-ps.detect(epsilon=0.10,min_inliers=50,knn=10,normal_th=0.8)
+# detect planar shapes with fitting tolerance epsilon = 1% of the pointcloud's bounding box diagonal
+ps.detect(epsilon=0.01*bb_diagonal,min_inliers=50,knn=10,normal_th=0.8)
 
 # refine planar shape configuration until convergence (i.e. no limit on number of iterations)
-ps.refine(max_iter=-1)
+ps.refine(max_iterations=-1)
+# if the point cloud is very large (e.g. > 2M points) you can also set a time limit
+ps.refine(max_seconds=180)
 
 # export planar shapes
 ps.save("example/data/anchor/convexes.ply","convex")                  

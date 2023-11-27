@@ -421,7 +421,6 @@ bool Shape_Detector::load_vg()
 bool Shape_Detector::load_npz()
 {
 
-
     /////// with xtensor
     auto a = xt::load_npz(path_point_cloud);
 

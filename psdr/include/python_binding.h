@@ -26,11 +26,13 @@ public:
 
     Shape_Detector _SD;
     Shape_Container _SC;
+    double bounding_box_diagonal;
 
     int load_points(const string filename);
     int load_points(const array3& points, const array3& normals, const array1& classes);
     int load_points(const array3& points, const array3& normals);
     int load_points(const array3& points);
+    double get_bounding_box_diagonal();
 
     int detect(int rg_min_points, double rg_epsilon, double rg_normal_threshold, int knn);
     int refine(int max_iterations, int max_seconds, double complexity, double completeness, double regularity, double fidelity);

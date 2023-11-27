@@ -71,6 +71,36 @@ int pyPSDR::load_points(const array3& points, const array3& normals, const array
 
 }
 
+
+double pyPSDR::get_bounding_box_diagonal(){
+
+
+    double xmin, xmax = _SD.points[0].first.x();
+    double ymin, ymax = _SD.points[0].first.y();
+    double zmin, zmax = _SD.points[0].first.z();
+
+    for(auto p : _SD.points){
+        // min
+        if(p.first.x() < xmin)
+            xmin = p.first.x();
+        if(p.first.y() < ymin)
+            ymin = p.first.y();
+        if(p.first.z() < zmin)
+            zmin = p.first.z();
+        // max
+        if(p.first.x() > xmax)
+            xmax = p.first.x();
+        if(p.first.y() > ymax)
+            ymax = p.first.y();
+        if(p.first.z() > zmax)
+            zmax = p.first.z();
+    }
+
+    bounding_box_diagonal = sqrt(pow(xmin-xmax,2)+pow(ymin-ymax,2)+pow(zmin-zmax,2));
+
+    return bounding_box_diagonal;
+}
+
 int pyPSDR::load_points(const array3& points, const array3& normals){
 
     _SD.points.clear();
@@ -84,6 +114,12 @@ int pyPSDR::load_points(const array3& points, const array3& normals){
 
     // this is later used to determine if planes should be detected or simply read from existing file, here we want them to be detected
     _SD.path_point_cloud_extension = ".ply";
+
+    if(points.shape(0) == 0){
+        _SD._logger->error("Empty points array!");
+        return 1;
+    }
+
 
 
     for(size_t i = 0; i < points.shape(0); i++){
@@ -100,7 +136,6 @@ int pyPSDR::load_points(const array3& points, const array3& normals){
     _SD.inliers_to_natural_colors = std::vector<CGAL::Color>(points.size(), CGAL::black());
     _SD.spacing_is_known = false;
     _SD.set_extrema();
-
 
 
     return 0;
@@ -213,6 +248,7 @@ NB_MODULE(pypsdr_ext, m){
             .def("load_points", nb::overload_cast<const array3&, const array3&, const array1&>(&pyPSDR::load_points), "points"_a, "normals"_a, "classes"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&, const array3&>(&pyPSDR::load_points), "points"_a, "normals"_a, "Load points and normals from numpy arrays.")
             .def("load_points", nb::overload_cast<const array3&>(&pyPSDR::load_points), "points"_a ,"Load points from a numpy array.")
+            .def("get_bounding_box_diagonal", &pyPSDR::get_bounding_box_diagonal, "Get the points bounding box diagonal.")
             .def("detect", &pyPSDR::detect, "min_inliers"_a = 25, "epsilon"_a = 0.2, "normal_th"_a = 0.85, "knn"_a = 10,"Detect planar shapes.")
             .def("refine", &pyPSDR::refine,
                  "max_iterations"_a = -1, "max_seconds"_a = -1,
