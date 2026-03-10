@@ -137,7 +137,6 @@ bool Shape_Detector::load_ply()
 
 	if (s == "format ascii 1.0") {
         std::ifstream stream(path_point_cloud);
-//        if (!stream || !CGAL::IO::read_PLY_with_properties(stream, std::back_inserter(points), CGAL::parameters::point_map(Point_map()).normal_map(Normal_map()))) {
         if (!stream || !CGAL::IO::read_PLY_with_properties(stream, std::back_inserter(points),
                                                            CGAL::IO::make_ply_point_reader(Point_map()),
                                                            CGAL::IO::make_ply_normal_reader(Normal_map()))) {
@@ -7882,10 +7881,6 @@ void Shape_Detector::detect_planes()
         inliers_to_planes = std::vector<int>(points.size(), -1);
         do_region_growing();
     }
-//    else {
-//        if (should_compute_knn) compute_average_spacing_and_k_nearest_neighbors();
-//        load_region_growing_results();
-//    }
 
 	// Part 2.
 	// Extracts planes

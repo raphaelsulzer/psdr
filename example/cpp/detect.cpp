@@ -5,7 +5,7 @@
 // EXTERNAL
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
-#include "yaml-cpp/yaml.h"
+// #include "yaml-cpp/yaml.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
@@ -50,8 +50,6 @@ int main(int argc, char const *argv[]){
         return 1;
     }
 
-
-
     double pd_epsilon = 0.02*SD.get_bbox_diagonal();
     int min_inliers = 50;
     double normal_th = 0.85;
@@ -61,8 +59,6 @@ int main(int argc, char const *argv[]){
 
 
     SD.set_detection_parameters(min_inliers, pd_epsilon, knn, normal_th);
-
-
     SD.set_discretization_parameters(0.5, pd_epsilon/2.0);
 
     auto SC = Shape_Container(&SD);

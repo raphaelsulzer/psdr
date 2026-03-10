@@ -20,7 +20,7 @@ find_package(CGAL QUIET REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS system filesystem thread serialization program_options)
 find_package(Eigen3 REQUIRED)
-find_package(yaml-cpp REQUIRED)
+# find_package(yaml-cpp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(xtl REQUIRED) # for xtensor
 find_package(ZLIB REQUIRED) # for xtensor

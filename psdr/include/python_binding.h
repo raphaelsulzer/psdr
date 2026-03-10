@@ -14,8 +14,10 @@ using namespace std;
 namespace nb = nanobind;
 using namespace nb::literals;
 
-typedef nb::ndarray<double, nb::shape<nb::any, 3>> array3;
-typedef nb::ndarray<int, nb::shape<nb::any>> array1;
+// typedef nb::ndarray<double, nb::shape<nb::any, 3>> array3;
+// typedef nb::ndarray<int, nb::shape<nb::any>> array1;
+typedef nb::ndarray<double> array3; // Dynamic shape for double arrays
+typedef nb::ndarray<int> array1;    // Dynamic shape for int arrays
 
 class pyPSDR
 {

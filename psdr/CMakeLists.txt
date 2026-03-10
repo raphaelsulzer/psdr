@@ -41,7 +41,7 @@ list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
 find_package(Eigen3 REQUIRED PATHS $CONDA_PREFIX/include/eigen3)
-find_package(yaml-cpp REQUIRED)
+# find_package(yaml-cpp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(xtl REQUIRED) # for xtensor
 find_package(ZLIB REQUIRED) # for xtensor
